@@ -289,6 +289,17 @@ void CustomFolderDialog::validate()
         error = FolderMan::instance()->checkPathValidityForNewFolder(localPath, FolderMan::NewFolderType::SpacesFolder, accountUuid);
     }
 
+    // Windows shows the sync root registration's icon (the OpenCloud one) for the folder that is the sync root.
+    // For a whole drive that would replace the drive icon, so virtual files are not offered there.
+    const bool isDriveRoot = !localPath.isEmpty() && QDir(localPath).isRoot();
+    const bool vfsAvailable = VfsPluginManager::instance().bestAvailableVfsMode() != Vfs::Mode::Off;
+    if (isDriveRoot && _vfsCheckBox->isChecked()) {
+        _vfsCheckBox->setChecked(false); // re-enters validate()
+        return;
+    }
+    _vfsCheckBox->setEnabled(vfsAvailable && !isDriveRoot);
+    _vfsCheckBox->setToolTip(isDriveRoot ? tr("Virtual files are not available when syncing a whole drive.") : QString());
+
     if (error.isEmpty() && _vfsCheckBox->isChecked()) {
         if (auto result = VfsPluginManager::instance().prepare(localPath, accountUuid, VfsPluginManager::instance().bestAvailableVfsMode()); !result) {
             error = result.error();

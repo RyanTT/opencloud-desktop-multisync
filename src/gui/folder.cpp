@@ -858,8 +858,10 @@ void Folder::wipeForRemoval()
     QFile::remove(u"%1/.OpenCloudSync.log"_s.arg(_canonicalLocalPath));
 
 #ifdef Q_OS_WIN
-    // remove the desktop ini
-    QFile::remove(u"%1/Desktop.ini"_s.arg(_canonicalLocalPath));
+    // remove the desktop ini, but not the one of a folder the user picked themselves
+    if (!_definition.customLocation) {
+        QFile::remove(u"%1/Desktop.ini"_s.arg(_canonicalLocalPath));
+    }
 #endif
 
     _vfs->stop();
