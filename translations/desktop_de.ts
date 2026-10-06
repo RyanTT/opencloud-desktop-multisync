@@ -297,6 +297,11 @@ Desktop-Client zur Dateisynchronisierung.</translation>
         <translation>Space hinzufügen</translation>
     </message>
     <message>
+        <location filename="../src/gui/qml/FolderDelegate.qml" line="421"/>
+        <source>Add Custom Folder</source>
+        <translation>Benutzerdefinierten Ordner hinzufügen</translation>
+    </message>
+    <message>
         <location filename="../src/gui/qml/FolderDelegate.qml" line="423"/>
         <source>You are synchronizing %1 out of %2 Spaces</source>
         <translation>%1 von %2 Spaces werden synchronisiert</translation>
@@ -865,6 +870,94 @@ Das Update wird im Hintergrund durchgeführt und überschreibt die aktuelle AppI
         <location filename="../src/libsync/creds/credentialmanager.cpp" line="222"/>
         <source>Failed to parse credentials %1</source>
         <translation>Fehler beim Verarbeiten der Zugangsdaten %1</translation>
+    </message>
+</context>
+<context>
+    <name>OCC::CustomFolderDialog</name>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="65"/>
+        <source>Sync a folder to a custom location</source>
+        <translation>Ordner mit benutzerdefiniertem Speicherort synchronisieren</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="69"/>
+        <source>Choose a folder on the server and any folder on this computer to keep in sync. Pick the top entry to sync the whole Space.</source>
+        <translation>Wählen Sie einen Ordner auf dem Server und einen beliebigen Ordner auf diesem Computer, die synchron gehalten werden sollen. Wählen Sie den obersten Eintrag, um den gesamten Space zu synchronisieren.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="77"/>
+        <source>Space:</source>
+        <translation>Space:</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="81"/>
+        <source>Folder on the server</source>
+        <translation>Ordner auf dem Server</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="88"/>
+        <source>Local folder, e.g. %1</source>
+        <translation>Lokaler Ordner, z. B. %1</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="89"/>
+        <source>Choose…</source>
+        <translation>Auswählen…</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="93"/>
+        <source>Local folder:</source>
+        <translation>Lokaler Ordner:</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="96"/>
+        <source>Use virtual files (download file contents on demand)</source>
+        <translation>Virtuelle Dateien verwenden (Dateiinhalte bei Bedarf herunterladen)</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="114"/>
+        <source>Add sync</source>
+        <translation>Synchronisierung hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="235"/>
+        <source>Could not load the list of folders from the server: %1</source>
+        <translation>Die Ordnerliste konnte nicht vom Server geladen werden: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="247"/>
+        <source>Select the local folder</source>
+        <translation>Lokalen Ordner auswählen</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="264"/>
+        <source>No Space available.</source>
+        <translation>Kein Space verfügbar.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="266"/>
+        <source>Select a folder on the server.</source>
+        <translation>Wählen Sie einen Ordner auf dem Server aus.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="271"/>
+        <source>Please enter an absolute path for the local folder.</source>
+        <translation>Bitte geben Sie einen absoluten Pfad für den lokalen Ordner ein.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="281"/>
+        <source>The selected server folder overlaps with the folder »%1« that is already synced to »%2«.</source>
+        <translation>Der ausgewählte Serverordner überschneidet sich mit dem Ordner »%1«, der bereits mit »%2« synchronisiert wird.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="301"/>
+        <source>The local folder is not empty. Its contents will be merged with the server folder: files that only exist locally will be uploaded, files that differ on both sides will be kept as conflict copies.</source>
+        <translation>Der lokale Ordner ist nicht leer. Sein Inhalt wird mit dem Serverordner zusammengeführt: Dateien, die nur lokal existieren, werden hochgeladen, Dateien, die auf beiden Seiten abweichen, bleiben als Konfliktkopien erhalten.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="304"/>
+        <source>The local folder will be created.</source>
+        <translation>Der lokale Ordner wird erstellt.</translation>
     </message>
 </context>
 <context>
