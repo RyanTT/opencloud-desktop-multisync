@@ -24,6 +24,7 @@
 #include "common/restartmanager.h"
 #include "commonstrings.h"
 #include "configfile.h"
+#include "customfolderdialog.h"
 #include "folderman.h"
 #include "folderstatusmodel.h"
 #include "folderwizard/folderwizard.h"
@@ -170,6 +171,28 @@ void AccountSettings::slotAddFolder()
     addModalLegacyDialog(folderWizard, AccountSettings::ModalWidgetSizePolicy::Expanding);
 }
 
+void AccountSettings::slotAddCustomFolder()
+{
+    FolderMan::instance()->setSyncEnabled(false); // do not start more syncs.
+
+    auto *dialog = new CustomFolderDialog(_accountState, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+    connect(dialog, &QDialog::accepted, this, [dialog, this] {
+        const auto result = dialog->result();
+        qCInfo(lcAccountSettings) << u"Custom folder dialog completed" << result.localPath << result.spaceId << result.remoteSubPath;
+        FolderMan::instance()->addCustomFolder(_accountState, result.spaceRootDavUrl, result.spaceId, result.spaceDisplayName, result.remoteSubPath,
+            result.localPath, result.useVirtualFiles);
+        FolderMan::instance()->setSyncEnabled(true);
+        FolderMan::instance()->scheduleAllFolders();
+    });
+    connect(dialog, &QDialog::rejected, this, [] {
+        qCInfo(lcAccountSettings) << u"Custom folder dialog cancelled";
+        FolderMan::instance()->setSyncEnabled(true);
+    });
+
+    addModalLegacyDialog(dialog, AccountSettings::ModalWidgetSizePolicy::Expanding);
+}
 
 void AccountSettings::slotFolderWizardAccepted()
 {

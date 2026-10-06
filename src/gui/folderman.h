@@ -131,6 +131,12 @@ public:
     Folder *addFolderFromWizard(const AccountStatePtr &accountStatePtr, FolderDefinition &&definition, bool useVfs);
     Folder *addFolderFromFolderWizardResult(const AccountStatePtr &accountStatePtr, const SyncConnectionDescription &config);
 
+    /**
+     * Adds a folder that syncs remoteSubPath of a Space (empty for the whole Space) to an arbitrary local path.
+     */
+    Folder *addCustomFolder(const AccountStatePtr &accountStatePtr, const QUrl &spaceRootDavUrl, const QString &spaceId, const QString &displayName,
+        const QString &remoteSubPath, const QString &localPath, bool useVirtualFiles);
+
     /** Removes a folder */
     void removeFolder(Folder *);
 

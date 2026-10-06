@@ -224,7 +224,8 @@ void FolderMan::saveFolders()
         auto definitionToSave = folder->_definition;
         // with spaces we rely on the space id
         // we save the dav URL nevertheless to have it available during startup
-        definitionToSave.setWebDavUrl(folder->webDavUrl());
+        // store the URL of the Space root, the remote sub path is stored separately
+        definitionToSave.setWebDavUrl(folder->spaceRootDavUrl());
         definitionToSave.setDisplayName(folder->displayName());
         FolderDefinition::save(settings, definitionToSave);
     }
@@ -725,7 +726,8 @@ Result<void, QString> FolderMan::unsupportedConfiguration(const QString &path) c
 
 bool FolderMan::isSpaceSynced(GraphApi::Space *space) const
 {
-    auto it = std::find_if(_folders.cbegin(), _folders.cend(), [space](auto f) { return f->space() == space; });
+    // a folder syncing only a sub folder of a Space doesn't count as syncing the Space itself
+    auto it = std::find_if(_folders.cbegin(), _folders.cend(), [space](auto f) { return f->space() == space && f->remoteSubPath().isEmpty(); });
     return it != _folders.cend();
 }
 
@@ -770,6 +772,17 @@ Folder *FolderMan::addFolderFromFolderWizardResult(const AccountStatePtr &accoun
         f->setPriority(description.priority);
     }
     return f;
+}
+
+Folder *FolderMan::addCustomFolder(const AccountStatePtr &accountStatePtr, const QUrl &spaceRootDavUrl, const QString &spaceId,
+    const QString &displayName, const QString &remoteSubPath, const QString &localPath, bool useVirtualFiles)
+{
+    FolderDefinition definition{accountStatePtr->account()->uuid(), spaceRootDavUrl, spaceId, displayName};
+    definition.setLocalPath(localPath);
+    definition.setRemoteSubPath(remoteSubPath);
+    definition.customLocation = true;
+    qCInfo(lcFolderMan) << u"Adding custom folder" << localPath << u"for Space" << spaceId << u"remote path" << definition.remoteSubPath();
+    return addFolderFromWizard(accountStatePtr, std::move(definition), useVirtualFiles);
 }
 
 QString FolderMan::suggestSyncFolder(NewFolderType folderType, const QUuid &accountUuid)

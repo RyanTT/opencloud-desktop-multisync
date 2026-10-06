@@ -35,6 +35,9 @@ private:
     FolderMan *_folderMan;
 
     std::unordered_map<Folder *, QString> _lastEtagJob;
+    // For folders syncing a sub folder of a Space the etag reported by the sync engine is the one of the sub folder,
+    // so we track the last seen etag of the Space root separately.
+    std::unordered_map<Folder *, QString> _lastSpaceRootEtag;
 };
 
 }

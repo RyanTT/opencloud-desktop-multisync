@@ -42,6 +42,13 @@ public:
     /// Which virtual files setting the folder uses
     Vfs::Mode virtualFilesMode = Vfs::Mode::Off;
 
+    /**
+     * The folder was added with a user chosen local path and/or remote sub folder,
+     * rather than as a Space inside the account's sync root.
+     * Custom folders don't get their Desktop.ini rewritten and don't count as "the" sync of their Space.
+     */
+    bool customLocation = false;
+
     /// Saves the folder definition into the current settings.
     static void save(QSettings &settings, const FolderDefinition &folder);
 
@@ -71,6 +78,16 @@ public:
     void setDisplayName(const QString &s);
 
     /**
+     * Path of the synced folder relative to the root of the Space.
+     * Empty when the whole Space is synced. Never starts or ends with a '/'.
+     */
+    QString remoteSubPath() const;
+    void setRemoteSubPath(const QString &path);
+
+    /// Normalises a remote path to the format used by remoteSubPath()
+    static QString normaliseRemoteSubPath(const QString &path);
+
+    /**
      * The folder is deployed by an admin
      * We will hide the remove option and the disable/enable vfs option.
      */
@@ -91,6 +108,7 @@ private:
 
     QString _spaceId;
     QString _displayName;
+    QString _remoteSubPath;
     /// path on local machine (always trailing /)
     QString _localPath;
     bool _deployed = false;

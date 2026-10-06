@@ -95,6 +95,7 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
     void slotAddFolder();
+    void slotAddCustomFolder();
     void slotEnableCurrentFolder(Folder *folder, bool terminate = false);
     void slotForceSyncCurrentFolder(Folder *folder);
     void slotRemoveCurrentFolder(Folder *folder);

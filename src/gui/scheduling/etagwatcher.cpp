@@ -33,11 +33,15 @@ ETagWatcher::ETagWatcher(FolderMan *folderMan, QObject *parent)
 {
     connect(folderMan, &FolderMan::folderListChanged, this, [this] {
         decltype(_lastEtagJob) intersection;
+        decltype(_lastSpaceRootEtag) spaceRootIntersection;
         for (auto *f : _folderMan->folders()) {
             if (f->isReady()) {
                 auto it = _lastEtagJob.find(f);
                 if (it != _lastEtagJob.cend()) {
                     intersection[f] = std::move(it->second);
+                    if (auto rootIt = _lastSpaceRootEtag.find(f); rootIt != _lastSpaceRootEtag.cend()) {
+                        spaceRootIntersection[f] = std::move(rootIt->second);
+                    }
                 } else {
                     intersection.emplace(f, QString());
                     connect(&f->syncEngine(), &SyncEngine::rootEtag, this, [f, this](const QString &etag, const QDateTime &time) {
@@ -50,7 +54,8 @@ ETagWatcher::ETagWatcher(FolderMan *folderMan, QObject *parent)
                         // the server must provide a valid etag but there might be bugs
                         // https://github.com/owncloud/ocis/issues/7160
                         if (OC_ENSURE_NOT(etag.isEmpty())) {
-                            auto &info = _lastEtagJob[f];
+                            // for a sub folder sync compare against the last seen Space root etag instead of the sub folder etag
+                            auto &info = f->remoteSubPath().isEmpty() ? _lastEtagJob[f] : _lastSpaceRootEtag[f];
                             if (f->canSync() && info != etag) {
                                 qCDebug(lcEtagWatcher) << u"Scheduling sync of" << f->displayName() << f->path() << u"due to an etag change";
                                 info = etag;
@@ -64,5 +69,6 @@ ETagWatcher::ETagWatcher(FolderMan *folderMan, QObject *parent)
             }
         }
         _lastEtagJob = std::move(intersection);
+        _lastSpaceRootEtag = std::move(spaceRootIntersection);
     });
 }

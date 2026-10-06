@@ -21,6 +21,7 @@
 #include "application.h"
 #include "common/filesystembase.h"
 #include "common/syncjournalfilerecord.h"
+#include "common/utility.h"
 #include "common/version.h"
 #include "configfile.h"
 #include "filesystem.h"
@@ -132,7 +133,10 @@ Folder::Folder(const FolderDefinition &definition, const AccountStatePtr &accoun
 
         connect(_accountState->account()->spacesManager(), &GraphApi::SpacesManager::spaceChanged, this, [this](GraphApi::Space *changedSpace) {
             if (_definition.spaceId() == changedSpace->id()) {
-                prepareFolder(path(), displayName(), changedSpace->drive().getDescription(), true);
+                // don't touch the Desktop.ini/folder icon of a folder the user picked themselves
+                if (!_definition.customLocation) {
+                    prepareFolder(path(), displayName(), changedSpace->drive().getDescription(), true);
+                }
                 Q_EMIT spaceChanged();
             }
         });
@@ -312,6 +316,9 @@ void Folder::prepareFolder(const QString &path, const QString &displayName, cons
 QString Folder::displayName() const
 {
     if (auto *s = space()) {
+        if (!_definition.remoteSubPath().isEmpty()) {
+            return u"%1/%2"_s.arg(s->displayName(), _definition.remoteSubPath());
+        }
         return s->displayName();
     }
     return _definition.displayName();
@@ -376,7 +383,7 @@ bool Folder::isSyncRunning() const
     return _syncResult.status() == SyncResult::SyncRunning;
 }
 
-QUrl Folder::webDavUrl() const
+QUrl Folder::spaceRootDavUrl() const
 {
     const QString spaceId = _definition.spaceId();
     if (!spaceId.isEmpty()) {
@@ -385,6 +392,26 @@ QUrl Folder::webDavUrl() const
         }
     }
     return _definition.webDavUrl();
+}
+
+QUrl Folder::webDavUrl() const
+{
+    const QUrl root = spaceRootDavUrl();
+    const QString subPath = _definition.remoteSubPath();
+    if (subPath.isEmpty()) {
+        return root;
+    }
+    return Utility::concatUrlPath(root, subPath);
+}
+
+QString Folder::remoteSubPath() const
+{
+    return _definition.remoteSubPath();
+}
+
+bool Folder::isCustomLocation() const
+{
+    return _definition.customLocation;
 }
 
 bool Folder::isSyncPaused() const

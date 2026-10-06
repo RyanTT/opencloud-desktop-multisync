@@ -100,9 +100,25 @@ public:
     QString cleanPath() const;
 
     /**
-     * The full remote WebDAV URL
+     * The full remote WebDAV URL of the synced folder.
+     * For custom folders this includes the remote sub path inside the Space.
      */
     QUrl webDavUrl() const;
+
+    /**
+     * The WebDAV URL of the root of the Space, without remoteSubPath()
+     */
+    QUrl spaceRootDavUrl() const;
+
+    /**
+     * Path of the synced folder relative to the Space root, empty if the whole Space is synced
+     */
+    QString remoteSubPath() const;
+
+    /**
+     * Whether the folder was set up with a user chosen local and/or remote location
+     */
+    bool isCustomLocation() const;
 
     /**
      * switch sync on or off
