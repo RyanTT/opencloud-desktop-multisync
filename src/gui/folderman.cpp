@@ -742,7 +742,8 @@ void FolderMan::slotReloadSyncOptions()
 
 Folder *FolderMan::addFolderFromWizard(const AccountStatePtr &accountStatePtr, FolderDefinition &&folderDefinition, bool useVfs)
 {
-    if (!FolderMan::prepareFolder(folderDefinition.localPath())) {
+    // a folder the user picked themselves keeps its own look (no Desktop.ini / system attribute)
+    if (!FolderMan::prepareFolder(folderDefinition.localPath(), !folderDefinition.customLocation)) {
         return {};
     }
 
@@ -790,14 +791,16 @@ QString FolderMan::suggestSyncFolder(NewFolderType folderType, const QUuid &acco
     return FolderMan::instance()->findGoodPathForNewSyncFolder(QDir::homePath(), Theme::instance()->appName(), folderType, accountUuid);
 }
 
-bool FolderMan::prepareFolder(const QString &folder)
+bool FolderMan::prepareFolder(const QString &folder, bool setFolderIcon)
 {
     if (!QFileInfo::exists(folder)) {
         if (!OC_ENSURE(QDir().mkpath(folder))) {
             return false;
         }
         FileSystem::setFolderMinimumPermissions(folder);
-        Folder::prepareFolder(folder, {}, {}, false);
+        if (setFolderIcon) {
+            Folder::prepareFolder(folder, {}, {}, false);
+        }
     }
     return true;
 }

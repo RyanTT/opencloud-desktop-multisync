@@ -266,7 +266,7 @@ private Q_SLOTS:
 private:
     explicit FolderMan();
 
-    [[nodiscard]] static bool prepareFolder(const QString &folder);
+    [[nodiscard]] static bool prepareFolder(const QString &folder, bool setFolderIcon = true);
 
     /** Adds a new folder, does not add it to the account settings and
      *  does not set an account on the new folder.
