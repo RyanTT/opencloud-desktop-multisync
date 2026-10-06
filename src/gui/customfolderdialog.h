@@ -47,7 +47,7 @@ public:
 
     explicit CustomFolderDialog(const AccountStatePtr &accountState, QWidget *parent = nullptr);
 
-    Result result() const;
+    Result selection() const;
 
 private:
     void populateSpaces();

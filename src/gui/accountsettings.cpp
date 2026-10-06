@@ -179,7 +179,7 @@ void AccountSettings::slotAddCustomFolder()
     dialog->setAttribute(Qt::WA_DeleteOnClose);
 
     connect(dialog, &QDialog::accepted, this, [dialog, this] {
-        const auto result = dialog->result();
+        const auto result = dialog->selection();
         qCInfo(lcAccountSettings) << u"Custom folder dialog completed" << result.localPath << result.spaceId << result.remoteSubPath;
         FolderMan::instance()->addCustomFolder(_accountState, result.spaceRootDavUrl, result.spaceId, result.spaceDisplayName, result.remoteSubPath,
             result.localPath, result.useVirtualFiles);

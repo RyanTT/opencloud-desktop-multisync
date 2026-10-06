@@ -313,7 +313,7 @@ void CustomFolderDialog::validate()
     _infoLabel->setText(info);
 }
 
-CustomFolderDialog::Result CustomFolderDialog::result() const
+CustomFolderDialog::Result CustomFolderDialog::selection() const
 {
     Result r;
     r.spaceId = _spaceCombo->currentData().toString();

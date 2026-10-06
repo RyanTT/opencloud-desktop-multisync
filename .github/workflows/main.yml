@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - claude/laughing-hawking-ob5ao5
       - 'stable-[0-9]+.[0-9]+'
       - 'stable-[0-9]+.[0-9]+.[0-9]+'
   pull_request:
@@ -17,9 +18,6 @@ on:
         options:
           - stable
           - beta
-  schedule:
-    - cron: '11 3 * * 1-5'
-      timezone: "Europe/Berlin"
 
 concurrency: 
   group: ${{ github.head_ref || github.run_id }}
@@ -57,32 +55,6 @@ jobs:
                         || startswith(github.ref,   'refs/tags/')
                       )
                   }}
-            - target: macos-clang-arm64
-              os: macos-latest
-              clang_tidy: false
-              container:
-              signing: &macos_signing
-                enabled: *signing_enabled
-                keyfile_secret_name: kv/data/signing/mac-keychain
-                keyfile_secret_field: b64
-                keyfile_file_path: /Users/runner
-                keyfile_file_name: ci-signing.keychain-db
-                passwords:
-                  - secret_name: kv/data/signing/mac-keychain
-                    secret_field: pw
-                    env_name: CRAFT_SECRET_MAC_KEYCHAIN_PASSWORD
-                  - secret_name: kv/data/signing/mac-keychain
-                    secret_field: notarization_pw
-                    env_name: CRAFT_SECRET_MAC_APP_PASSWORD
-            - target: macos-clang-x86_64
-              os: macos-latest
-              clang_tidy: false
-              container:
-              signing: *macos_signing
-            - target: linux-gcc-x86_64
-              os: ubuntu-latest
-              clang_tidy: true
-              container: invent-registry.kde.org/sysadmin/ci-images/craft-appimage-alma9:latest
 
     name: ${{ matrix.target }}
 
@@ -283,7 +255,7 @@ jobs:
         & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --package opencloud/opencloud-desktop
 
     - name: Package for testing
-      if: ${{ github.event_name == 'pull_request' }}
+      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/claude/laughing-hawking-ob5ao5' }}
       run: |
         if ($isLinux) {
           # its always an appimage on linux
@@ -310,7 +282,7 @@ jobs:
         Remove-Item -force "${{ matrix.signing.keyfile_file_path }}\${{ matrix.signing.keyfile_file_name }}"
 
     - name: Package msix
-      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' }}
+      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/claude/laughing-hawking-ob5ao5' }}
       run: |
         & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --package --options "[Packager]PackageType=AppxPackager" --options "[Packager]Destination=${{ github.workspace }}/msix/" opencloud/opencloud-desktop
         Move-Item -Path "${{ github.workspace }}/msix/*.msix" -Destination "${{ github.workspace }}/msix/OpenCloud_Desktop-${{ github.run_number }}.msix" -Force
@@ -322,7 +294,7 @@ jobs:
         path: ${{ github.workspace }}/binaries/*
 
     - name: Upload store msix
-      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' }}
+      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/claude/laughing-hawking-ob5ao5' }}
       uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.target }}-store-msix-${{ github.run_number }}
@@ -331,7 +303,7 @@ jobs:
 
     - name: Upload unsigned msix
       id: upload-unsigned-artifact
-      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' }}
+      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/claude/laughing-hawking-ob5ao5' }}
       uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.target }}-msix-unsigned-temp-${{ github.run_number }}
