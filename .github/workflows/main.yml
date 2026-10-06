@@ -264,6 +264,11 @@ jobs:
           & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --package --options "[Packager]PackageType=PortablePackager" opencloud/opencloud-desktop
         }
 
+    - name: Package installer (NSIS, unsigned, test branch only)
+      if: ${{ startsWith(matrix.os, 'windows-') && github.ref == 'refs/heads/claude/laughing-hawking-ob5ao5' }}
+      run: |
+        & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --package --options "[Packager]PackageType=NullsoftInstallerPackager" opencloud/opencloud-desktop
+
     - name: Prepare artifacts
       run: |
         Copy-Item "${home}/craft/binaries/*" "${env:GITHUB_WORKSPACE}/binaries/" -ErrorAction SilentlyContinue
