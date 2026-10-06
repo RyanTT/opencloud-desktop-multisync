@@ -33,8 +33,8 @@ jobs:
 # ------------------------------------------------------------------------------------------------------------------------------------------
   build:
     permissions:
-      # actions/upload-artifact doesn't need contents: write
-      contents: read
+      # contents: write is needed to publish the beta release
+      contents: write
       actions: read
       security-events: write
     strategy:
@@ -297,6 +297,26 @@ jobs:
       with:
         name: ${{ matrix.target }}-${{ github.run_number }}
         path: ${{ github.workspace }}/binaries/*
+
+    - name: Publish setup as beta release
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/claude/laughing-hawking-ob5ao5' }}
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # only the installer goes into the release, not the portable package or symbols
+        $setup = @(Get-ChildItem "${env:GITHUB_WORKSPACE}/binaries/" -File -Filter "*.exe")
+        if ($setup.Count -ne 1) {
+          Write-Error "Expected exactly one setup .exe, found $($setup.Count): $($setup.Name -join ', ')"
+          exit 1
+        }
+        $tag = "beta-${{ github.run_number }}"
+        gh release create $tag $setup[0].FullName `
+          --repo "${{ github.repository }}" `
+          --target "${{ github.sha }}" `
+          --title "Beta ${{ github.run_number }}" `
+          --notes "Unsigned beta build of ${{ github.sha }} from ${{ github.ref_name }}." `
+          --prerelease
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     - name: Upload store msix
       if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/claude/laughing-hawking-ob5ao5' }}
