@@ -1,40 +1,40 @@
-[![OpenCloud Desktop CI](https://github.com/opencloud-eu/desktop/actions/workflows/main.yml/badge.svg)](https://github.com/opencloud-eu/desktop/actions/workflows/main.yml)
-# `OpenCloud Desktop`
+[![OpenCloud Desktop CI](https://github.com/RyanTT/opencloud-desktop-multisync/actions/workflows/main.yml/badge.svg)](https://github.com/RyanTT/opencloud-desktop-multisync/actions/workflows/main.yml)
+# `OpenCloud Desktop` (multisync fork)
 
-## Introduction
+An unofficial fork of the [`OpenCloud Desktop`](https://github.com/opencloud-eu/desktop)
+client, which synchronizes files from `OpenCloud` with your computer. It is not
+affiliated with or supported by the upstream project.
 
-`OpenCloud Desktop` is a tool to synchronize files from `OpenCloud`
-with your computer.
+## What this fork adds
+
+- **Sync any folder to any local folder.** The new "Add Custom Folder" button
+  syncs a whole Space, or any folder inside a Space, to a local folder of your
+  choice. Upstream only syncs a whole Space into the default sync root.
+- Pick the server folder from a tree that loads on demand.
+- Virtual files can be switched on or off for each custom folder.
+- Checks for overlapping server folders and invalid local paths before a sync is added.
+- Custom folders keep their own look: the client does not write or remove a
+  `Desktop.ini` in a folder you picked yourself.
+
+Everything else behaves like upstream.
 
 ## Download
 
-### Binary packages
+Releases are in the [Releases tab](https://github.com/RyanTT/opencloud-desktop-multisync/releases).
+They are unsigned beta builds of the Windows setup, so Windows SmartScreen may
+warn on first launch.
 
-- Please have a look at our releases https://github.com/opencloud-eu/desktop/releases
+## Source code and upstream
 
-### Source code
+This repository is a fork of https://github.com/opencloud-eu/desktop. The
+authoritative upstream project, its releases and its contributors are there.
 
-The `OpenCloud Desktop` is developed in Git. Since Git makes it easy to
-fork and improve the source code and to adapt it to your need, many copies
-can be found on the Internet, in particular on GitHub. However, the
-authoritative repository maintained by the developers is located at
-https://github.com/opencloud-eu/desktop/.
+## Reporting issues
 
-## Reporting issues and contributing
-
-If you find any bugs or have any suggestion for improvement, please
-file an issue at https://github.com/opencloud-eu/desktop/issues. Do not
-contact the authors directly by mail, as this increases the chance
-of your report being lost.
-
-If you created a patch, please submit a [Pull
-Request](https://github.com/opencloud-eu/desktop/pulls).
-
-## Maintainers and Contributors
-
-`OpenCloud Desktop` is developed by the `OpenCloud` community and [receives
-patches from a variety of authors](https://github.com/opencloud-eu/desktop/graphs/contributors).
-
+Problems with the features listed above belong in this repository's
+[issues](https://github.com/RyanTT/opencloud-desktop-multisync/issues). For
+anything that also happens in the upstream client, please use the
+[upstream issue tracker](https://github.com/opencloud-eu/desktop/issues).
 
 ## License
 
