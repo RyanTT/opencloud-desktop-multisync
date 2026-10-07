@@ -160,8 +160,8 @@ void SyncScheduler::enqueueFolder(Folder *folder, Priority priority)
     if (folder != _currentSync) {
         // don't override the state of the currently syncing folder
         Q_ASSERT(folder->syncState() != SyncResult::Paused);
-        // A terminated sync (account disconnected, force sync, ...) is no longer our current sync, but the folder keeps
-        // reporting SyncRunning until its engine has finished aborting. Queue it anyway, it is started once the abort is done.
+        // A folder can be running without being our current sync, e.g. when terminateCurrentSync() hit a phase where
+        // the engine could not abort it. Queue it anyway without touching its state, it is started once it has finished.
         if (!folder->isSyncRunning()) {
             folder->setSyncState(SyncResult::Queued);
         }
@@ -214,8 +214,8 @@ void SyncScheduler::startNext()
         }
         std::tie(_currentSync, syncPriority) = _queue->pop();
         seen.insert(_currentSync);
-        // The previous sync of this folder was terminated but is still shutting down, we can't start it again yet.
-        // Folder::syncFinished triggers startNext() once it is done.
+        // This folder is still running a sync we no longer track (see above), we can't start it again yet.
+        // Its Folder::syncFinished triggers startNext() once it is done.
         if (_currentSync->isSyncRunning()) {
             qCInfo(lcSyncScheduler) << u"Skipping sync of" << _currentSync->path() << u"because its previous sync is still finishing";
             _queue->enqueueFolder(_currentSync, syncPriority);
@@ -245,7 +245,7 @@ void SyncScheduler::startNext()
         _currentSync, &Folder::syncFinished, this,
         [sync = _currentSync, this](const SyncResult &result) {
             qCInfo(lcSyncScheduler) << u"Sync finished for" << sync->path() << u"with status" << result.status();
-            // a terminated sync reports back late, by then another folder might be our current sync
+            // an untracked sync can finish while another folder is our current sync
             if (_currentSync == sync) {
                 _currentSync.clear();
             }
@@ -284,11 +284,16 @@ Folder *SyncScheduler::currentSync()
 void SyncScheduler::terminateCurrentSync(const QString &reason)
 {
     if (_currentSync && _currentSync->isReady()) {
-        qCInfo(lcSyncScheduler) << u"folder" << _currentSync->path() << _currentSync->syncState() << u"Terminating!";
-        if (OC_ENSURE(_currentSync->syncEngine().isSyncRunning())) {
-            _currentSync->syncEngine().abort(reason);
+        const QPointer<Folder> folder = _currentSync;
+        qCInfo(lcSyncScheduler) << u"folder" << folder->path() << folder->syncState() << u"Terminating!";
+        if (OC_ENSURE(folder->syncEngine().isSyncRunning())) {
+            folder->syncEngine().abort(reason);
         }
-        _currentSync.clear();
+        // abort() usually finishes the sync synchronously: Folder::syncFinished already cleared _currentSync and
+        // startNext() might have started the next folder. Don't lose track of that one.
+        if (_currentSync == folder) {
+            _currentSync.clear();
+        }
     }
 }
 
