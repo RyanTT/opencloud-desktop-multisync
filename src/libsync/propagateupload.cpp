@@ -162,6 +162,13 @@ void PropagateUploadFileCommon::slotComputeContentChecksum()
 
     const QString filePath = propagator()->fullLocalPath(_item->localName());
 
+    // the file might have been removed or renamed since discovery (e.g. browser temp files), that is no reason to fail hard
+    if (!FileSystem::fileExists(filePath)) {
+        propagator()->_anotherSyncNeeded = true;
+        done(SyncFileItem::SoftError, tr("File Removed"));
+        return;
+    }
+
     // remember the modtime before checksumming to be able to detect a file
     // change during the checksum calculation
     _item->_modtime = FileSystem::getModTime(filePath);
