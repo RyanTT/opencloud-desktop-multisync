@@ -159,9 +159,12 @@ void SyncScheduler::enqueueFolder(Folder *folder, Priority priority)
     // TODO: setSyncState should not be public...
     if (folder != _currentSync) {
         // don't override the state of the currently syncing folder
-        Q_ASSERT(folder->syncState() != SyncResult::SyncRunning);
         Q_ASSERT(folder->syncState() != SyncResult::Paused);
-        folder->setSyncState(SyncResult::Queued);
+        // A terminated sync (account disconnected, force sync, ...) is no longer our current sync, but the folder keeps
+        // reporting SyncRunning until its engine has finished aborting. Queue it anyway, it is started once the abort is done.
+        if (!folder->isSyncRunning()) {
+            folder->setSyncState(SyncResult::Queued);
+        }
     }
     _queue->enqueueFolder(folder, priority);
 
@@ -211,6 +214,14 @@ void SyncScheduler::startNext()
         }
         std::tie(_currentSync, syncPriority) = _queue->pop();
         seen.insert(_currentSync);
+        // The previous sync of this folder was terminated but is still shutting down, we can't start it again yet.
+        // Folder::syncFinished triggers startNext() once it is done.
+        if (_currentSync->isSyncRunning()) {
+            qCInfo(lcSyncScheduler) << u"Skipping sync of" << _currentSync->path() << u"because its previous sync is still finishing";
+            _queue->enqueueFolder(_currentSync, syncPriority);
+            _currentSync.clear();
+            continue;
+        }
         // If the folder is deleted in the meantime, we skip it
         if (!_currentSync->canSync()) {
             qCInfo(lcSyncScheduler) << u"Skipping sync of" << _currentSync->path() << u"because it is not ready";
@@ -234,7 +245,10 @@ void SyncScheduler::startNext()
         _currentSync, &Folder::syncFinished, this,
         [sync = _currentSync, this](const SyncResult &result) {
             qCInfo(lcSyncScheduler) << u"Sync finished for" << sync->path() << u"with status" << result.status();
-            _currentSync.clear();
+            // a terminated sync reports back late, by then another folder might be our current sync
+            if (_currentSync == sync) {
+                _currentSync.clear();
+            }
             startNext();
         },
         static_cast<Qt::ConnectionType>(Qt::DirectConnection | Qt::SingleShotConnection));
