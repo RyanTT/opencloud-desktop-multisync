@@ -68,6 +68,12 @@ GeneralSettings::GeneralSettings(QWidget *parent)
         Q_EMIT syncOptionsChanged();
     });
 
+    // thumbnails of online-only files need the Windows shell extension
+    _ui->prefetchThumbnailsCheckBox->setVisible(Utility::isWindows());
+    _ui->prefetchThumbnailsCheckBox->setToolTip(
+        tr("Applies to folders added from now on. Existing folders can be changed in the menu of the folder in the account settings."));
+    connect(_ui->prefetchThumbnailsCheckBox, &QCheckBox::toggled, this, [](bool checked) { ConfigFile().setPrefetchThumbnailsForNewFolders(checked); });
+
     connect(_ui->ignoredFilesButton, &QAbstractButton::clicked, this, &GeneralSettings::slotIgnoreFilesEditor);
     connect(_ui->logSettingsButton, &QPushButton::clicked, this, [] {
         // only access occApp after things are set up
@@ -136,6 +142,7 @@ void GeneralSettings::reloadConfig()
 {
     _ui->syncHiddenFilesCheckBox->setChecked(!FolderMan::instance()->ignoreHiddenFiles());
     _ui->moveToTrashCheckBox->setChecked(ConfigFile().moveToTrash());
+    _ui->prefetchThumbnailsCheckBox->setChecked(ConfigFile().prefetchThumbnailsForNewFolders());
     if (Utility::isWindows() && Utility::isInstalledByStore()) {
         _ui->autostartCheckBox->setVisible(false);
     } else {

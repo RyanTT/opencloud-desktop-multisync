@@ -1401,6 +1401,16 @@ Please consider removing this folder from the account and adding it again.</sour
 <context>
     <name>OCC::GeneralSettings</name>
     <message>
+        <location filename="../src/gui/generalsettings.ui" line="123"/>
+        <source>Keep thumbnails available offline for new folders with virtual files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/generalsettings.cpp" line="74"/>
+        <source>Applies to folders added from now on. Existing folders can be changed in the menu of the folder in the account settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/gui/generalsettings.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>

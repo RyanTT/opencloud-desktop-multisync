@@ -751,6 +751,10 @@ Folder *FolderMan::addFolderFromWizard(const AccountStatePtr &accountStatePtr, F
 
     if (useVfs) {
         folderDefinition.virtualFilesMode = VfsPluginManager::instance().bestAvailableVfsMode();
+#ifdef Q_OS_WIN
+        // thumbnails of online-only files need the Windows shell extension
+        folderDefinition.prefetchThumbnails = folderDefinition.virtualFilesMode == Vfs::Mode::WindowsCfApi && ConfigFile().prefetchThumbnailsForNewFolders();
+#endif
     }
 
     auto newFolder = addFolder(accountStatePtr, folderDefinition);

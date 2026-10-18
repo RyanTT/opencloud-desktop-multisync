@@ -1386,6 +1386,16 @@ Bitte entfernen Sie diesen Ordner aus dem Konto und legen Sie ihn erneut an.</tr
 <context>
     <name>OCC::GeneralSettings</name>
     <message>
+        <location filename="../src/gui/generalsettings.ui" line="123"/>
+        <source>Keep thumbnails available offline for new folders with virtual files</source>
+        <translation>Vorschaubilder für neue Ordner mit virtuellen Dateien offline verfügbar halten</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/generalsettings.cpp" line="74"/>
+        <source>Applies to folders added from now on. Existing folders can be changed in the menu of the folder in the account settings.</source>
+        <translation>Gilt für Ordner, die ab jetzt hinzugefügt werden. Bestehende Ordner lassen sich im Menü des Ordners in den Kontoeinstellungen ändern.</translation>
+    </message>
+    <message>
         <location filename="../src/gui/generalsettings.ui" line="14"/>
         <source>Form</source>
         <translation>Formular</translation>

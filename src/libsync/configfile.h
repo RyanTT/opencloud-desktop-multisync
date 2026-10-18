@@ -115,6 +115,10 @@ public:
     bool moveToTrash() const;
     void setMoveToTrash(bool);
 
+    /** If new virtual files folders keep thumbnails available offline (Windows only) */
+    bool prefetchThumbnailsForNewFolders() const;
+    void setPrefetchThumbnailsForNewFolders(bool enabled);
+
     /// Used for testing, so we do not change the user's config file.
     static bool setConfDir(const QString &value);
 

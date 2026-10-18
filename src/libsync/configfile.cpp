@@ -87,6 +87,7 @@ const QString pauseSyncWhenMeteredC()
     return QStringLiteral("pauseWhenMetered");
 }
 const QString moveToTrashC() { return QStringLiteral("moveToTrash"); }
+const QString prefetchThumbnailsForNewFoldersC() { return QStringLiteral("prefetchThumbnailsForNewFolders"); }
 
 const QString issuesWidgetFilterC()
 {
@@ -430,6 +431,16 @@ bool ConfigFile::moveToTrash() const
 void ConfigFile::setMoveToTrash(bool isChecked)
 {
     setValue(moveToTrashC(), isChecked);
+}
+
+bool ConfigFile::prefetchThumbnailsForNewFolders() const
+{
+    return getValue(prefetchThumbnailsForNewFoldersC(), false).toBool();
+}
+
+void ConfigFile::setPrefetchThumbnailsForNewFolders(bool enabled)
+{
+    setValue(prefetchThumbnailsForNewFoldersC(), enabled);
 }
 
 bool ConfigFile::crashReporter() const
