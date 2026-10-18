@@ -151,6 +151,7 @@ elseif( WIN32 )
             folderwatcher_win.cpp
             navigationpanehelper.cpp
             thumbnailserver.cpp
+            thumbnailstore.cpp
     )
     if (TARGET SnoreToast::SnoreToastActions)
         target_sources(OpenCloudGui PRIVATE
