@@ -654,3 +654,17 @@ QDebug operator<<(QDebug debug, const OCC::CfApiWrapper::CallBackContext &contex
     debug << u")";
     return debug.maybeSpace();
 }
+
+QString OCC::CfApiWrapper::syncRootId(const VfsSetupParams &params)
+{
+    return createSyncRootID(params.providerName, params.account->uuid(), params.filesystemPath());
+}
+
+QString OCC::CfApiWrapper::syncRootIdPrefix(const QString &providerName)
+{
+    const auto windowsSid = retrieveWindowsSid();
+    if (windowsSid.isEmpty()) {
+        return {};
+    }
+    return u"%1!%2!"_s.arg(providerName, windowsSid);
+}

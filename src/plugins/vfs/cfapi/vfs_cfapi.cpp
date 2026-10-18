@@ -8,6 +8,7 @@
 #include <QDir>
 
 #include "cfapiwrapper.h"
+#include "shellextensionregistration.h"
 #include "common/filesystembase.h"
 #include "common/syncjournaldb.h"
 #include "filesystem.h"
@@ -29,73 +30,6 @@ using namespace Qt::Literals::StringLiterals;
 
 namespace cfapi {
 using namespace OCC::CfApiWrapper;
-
-constexpr auto appIdRegKey = R"(Software\Classes\AppID\)";
-constexpr auto clsIdRegKey = R"(Software\Classes\CLSID\)";
-const auto rootKey = HKEY_CURRENT_USER;
-
-#if 0
-bool registerShellExtension()
-{
-    const QList<QPair<QString, QString>> listExtensions = {{CFAPI_SHELLEXT_THUMBNAIL_HANDLER_DISPLAY_NAME, CFAPI_SHELLEXT_THUMBNAIL_HANDLER_CLASS_ID_REG},
-        {CFAPI_SHELLEXT_CUSTOM_STATE_HANDLER_DISPLAY_NAME, CFAPI_SHELLEXT_CUSTOM_STATE_HANDLER_CLASS_ID_REG}};
-    // assume CFAPI_SHELL_EXTENSIONS_LIB_NAME is always in the same folder as the main executable
-    // assume CFAPI_SHELL_EXTENSIONS_LIB_NAME is always in the same folder as the main executable
-    const auto shellExtensionDllPath = QDir::toNativeSeparators(
-        QString(QCoreApplication::applicationDirPath() + QStringLiteral("/") + CFAPI_SHELL_EXTENSIONS_LIB_NAME + QStringLiteral(".dll")));
-    if (!OCC::FileSystem::fileExists(shellExtensionDllPath)) {
-        Q_ASSERT(false);
-        qCWarning(lcCfApi) << u"Register CfAPI shell extensions failed. Dll does not exist in " << QCoreApplication::applicationDirPath();
-        return false;
-    }
-
-    const QString appIdPath = QString() % appIdRegKey % CFAPI_SHELLEXT_APPID_REG;
-    if (!OCC::Utility::registrySetKeyValue(rootKey, appIdPath, {}, REG_SZ, CFAPI_SHELLEXT_APPID_DISPLAY_NAME)) {
-        return false;
-    }
-    if (!OCC::Utility::registrySetKeyValue(rootKey, appIdPath, QStringLiteral("DllSurrogate"), REG_SZ, {})) {
-        return false;
-    }
-
-    for (const auto extension : listExtensions) {
-        const QString clsidPath = QString() % clsIdRegKey % extension.second;
-        const QString clsidServerPath = clsidPath % R"(\InprocServer32)";
-
-        if (!OCC::Utility::registrySetKeyValue(rootKey, clsidPath, QStringLiteral("AppID"), REG_SZ, CFAPI_SHELLEXT_APPID_REG)) {
-            return false;
-        }
-        if (!OCC::Utility::registrySetKeyValue(rootKey, clsidPath, {}, REG_SZ, extension.first)) {
-            return false;
-        }
-        if (!OCC::Utility::registrySetKeyValue(rootKey, clsidServerPath, {}, REG_SZ, shellExtensionDllPath)) {
-            return false;
-        }
-        if (!OCC::Utility::registrySetKeyValue(rootKey, clsidServerPath, QStringLiteral("ThreadingModel"), REG_SZ, QStringLiteral("Apartment"))) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void unregisterShellExtensions()
-{
-    const QString appIdPath = QString() % appIdRegKey % CFAPI_SHELLEXT_APPID_REG;
-    if (OCC::Utility::registryKeyExists(rootKey, appIdPath)) {
-        OCC::Utility::registryDeleteKeyTree(rootKey, appIdPath);
-    }
-
-    const QStringList listExtensions = {CFAPI_SHELLEXT_CUSTOM_STATE_HANDLER_CLASS_ID_REG, CFAPI_SHELLEXT_THUMBNAIL_HANDLER_CLASS_ID_REG};
-
-    for (const auto extension : listExtensions) {
-        const QString clsidPath = QString() % clsIdRegKey % extension;
-        if (OCC::Utility::registryKeyExists(rootKey, clsidPath)) {
-            OCC::Utility::registryDeleteKeyTree(rootKey, clsidPath);
-        }
-    }
-}
-
-#endif
 }
 
 namespace OCC {
@@ -114,10 +48,16 @@ Vfs::Mode VfsCfApi::mode() const
 
 void VfsCfApi::startImpl(const VfsSetupParams &params)
 {
-    // cfapi::registerShellExtension();
+    // once per process, it only points the COM registration at the DLL of the running client
+    static const bool thumbnailHandlerRegistered = CfApiShellExtension::registerThumbnailHandler();
 
     cfapi::registerSyncRoot(params, [this](const QString &errorMessage) {
         if (errorMessage.isEmpty()) {
+            // previews of dehydrated files in Explorer, syncing works without it
+            if (thumbnailHandlerRegistered && !CfApiShellExtension::attachThumbnailHandler(cfapi::syncRootId(this->params()))) {
+                qCWarning(lcCfApi) << u"Explorer won't show thumbnails for dehydrated files in" << this->params().filesystemPath();
+            }
+
             auto connectResult = cfapi::connectSyncRoot(this->params().root(), this);
             if (!connectResult) {
                 qCCritical(lcCfApi) << u"Initialization failed, couldn't connect sync root:" << connectResult.error();
@@ -162,16 +102,18 @@ void VfsCfApi::stop()
 
 void VfsCfApi::unregisterFolder()
 {
+    CfApiShellExtension::detachThumbnailHandler(cfapi::syncRootId(params()));
+
     const auto result = cfapi::unregisterSyncRoot(params());
     if (!result) {
         qCCritical(lcCfApi) << u"Unregistration failed for" << params().filesystemPath() << u":" << result.error();
     }
 
-#if 0
-    if (!cfapi::isAnySyncRoot(params().providerName, params().account->displayName())) {
-        cfapi::unregisterShellExtensions();
+    // the COM registration is only needed while this client has sync roots
+    const auto prefix = cfapi::syncRootIdPrefix(params().providerName);
+    if (!prefix.isEmpty() && !CfApiShellExtension::hasSyncRootsWithPrefix(prefix)) {
+        CfApiShellExtension::unregisterThumbnailHandler();
     }
-#endif
 }
 
 bool VfsCfApi::socketApiPinStateActionsShown() const

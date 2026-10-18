@@ -89,8 +89,12 @@ namespace CfApiWrapper {
     };
 
     void registerSyncRoot(const VfsSetupParams &params, const std::function<void(QString)> &callback);
-    // void unregisterSyncRootShellExtensions(const QString &providerName, const QString &folderAlias, const QString &accountDisplayName);
     Result<void, QString> unregisterSyncRoot(const VfsSetupParams &params);
+
+    // the id the sync root is registered with: providerName!windowsSid!accountUuid!pathHash
+    QString syncRootId(const VfsSetupParams &params);
+    // providerName!windowsSid!, the part all sync roots of this client for the current user share
+    QString syncRootIdPrefix(const QString &providerName);
 
     Result<CF_CONNECTION_KEY, QString> connectSyncRoot(const std::filesystem::path &path, VfsCfApi *context);
     Result<void, QString> disconnectSyncRoot(CF_CONNECTION_KEY &&key);
