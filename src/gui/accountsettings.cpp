@@ -49,6 +49,7 @@
 #include "gui/thumbnailserver.h"
 #endif
 
+#include <QSet>
 #include <QSortFilterProxyModel>
 #include <QtQuickWidgets/QtQuickWidgets>
 
@@ -449,9 +450,15 @@ void AccountSettings::slotAccountStateChanged()
 void AccountSettings::slotSpacesUpdated()
 {
     const uint64_t enabledSpaces = std::ranges::count_if(accountsState()->account()->spacesManager()->spaces(), [](const auto *s) { return !s->disabled(); });
-    const uint64_t syncedSpaces = std::ranges::count_if(
-        FolderMan::instance()->folders(), [this](const auto *f) { return f->accountState() == accountsState() && f->space() && !f->space()->disabled(); });
-    const auto unsyncedSpaces = enabledSpaces - syncedSpaces;
+    // several folders can sync (parts of) the same Space, count each Space once
+    QSet<QString> syncedSpaceIds;
+    for (const auto *f : FolderMan::instance()->folders()) {
+        if (f->accountState() == accountsState() && f->space() && !f->space()->disabled()) {
+            syncedSpaceIds.insert(f->space()->id());
+        }
+    }
+    const uint64_t syncedSpaces = syncedSpaceIds.size();
+    const auto unsyncedSpaces = enabledSpaces > syncedSpaces ? enabledSpaces - syncedSpaces : 0;
 
     if (_unsyncedSpaces != unsyncedSpaces) {
         _unsyncedSpaces = unsyncedSpaces;
