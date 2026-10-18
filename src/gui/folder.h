@@ -61,6 +61,7 @@ class OPENCLOUD_GUI_EXPORT Folder : public QObject
     Q_PROPERTY(bool isSyncRunning READ isSyncRunning NOTIFY isSyncRunningChanged)
     Q_PROPERTY(bool isDeployed READ isDeployed CONSTANT)
     Q_PROPERTY(Vfs::Mode vfsMode READ vfsMode CONSTANT)
+    Q_PROPERTY(bool prefetchThumbnails READ prefetchThumbnails NOTIFY prefetchThumbnailsChanged)
     QML_ELEMENT
     QML_UNCREATABLE("Folders can only be created by the FolderManager")
 
@@ -119,6 +120,12 @@ public:
      * Whether the folder was set up with a user chosen local and/or remote location
      */
     bool isCustomLocation() const;
+
+    /**
+     * Whether thumbnails of all images in this folder are kept available locally
+     */
+    bool prefetchThumbnails() const;
+    void setPrefetchThumbnails(bool prefetch);
 
     /**
      * switch sync on or off
@@ -252,6 +259,7 @@ Q_SIGNALS:
     void spaceChanged();
     void isReadyChanged();
     void isSyncRunningChanged();
+    void prefetchThumbnailsChanged();
 
     void webUrlChanged();
 

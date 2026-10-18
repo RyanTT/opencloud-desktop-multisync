@@ -414,6 +414,19 @@ bool Folder::isCustomLocation() const
     return _definition.customLocation;
 }
 
+bool Folder::prefetchThumbnails() const
+{
+    return _definition.prefetchThumbnails;
+}
+
+void Folder::setPrefetchThumbnails(bool prefetch)
+{
+    if (_definition.prefetchThumbnails != prefetch) {
+        _definition.prefetchThumbnails = prefetch;
+        Q_EMIT prefetchThumbnailsChanged();
+    }
+}
+
 bool Folder::isSyncPaused() const
 {
     return _definition.paused;

@@ -216,6 +216,9 @@ public:
 
     /** Queues all folders for syncing. */
     void scheduleAllFolders();
+
+    // persists the folder definitions
+    void saveFolders();
     void setDirtyNetworkLimits();
 
     /** If the folder configuration is no longer supported this will return an error string */
@@ -276,8 +279,6 @@ private:
 
     /* unloads a folder object, does not delete it */
     void unloadFolder(Folder *);
-
-    void saveFolders();
 
     // finds all folder configuration files
     // and create the folders

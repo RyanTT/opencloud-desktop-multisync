@@ -57,6 +57,11 @@ auto customLocationC()
 {
     return "customLocation";
 }
+
+auto prefetchThumbnailsC()
+{
+    return "prefetchThumbnails";
+}
 }
 
 FolderDefinition::FolderDefinition(const QUuid &accountUuid, const QUrl &davUrl, const QString &spaceId, const QString &displayName)
@@ -97,6 +102,7 @@ void FolderDefinition::save(QSettings &settings, const FolderDefinition &folder)
     settings.setValue(priorityC(), folder.priority());
     settings.setValue(remoteSubPathC(), folder.remoteSubPath());
     settings.setValue(customLocationC(), folder.customLocation);
+    settings.setValue(prefetchThumbnailsC(), folder.prefetchThumbnails);
 
     settings.setValue("virtualFilesMode", Utility::enumToString(folder.virtualFilesMode));
 }
@@ -114,6 +120,7 @@ FolderDefinition FolderDefinition::load(QSettings &settings)
     folder._priority = settings.value(priorityC(), 0).toUInt();
     folder.setRemoteSubPath(settings.value(remoteSubPathC()).toString());
     folder.customLocation = settings.value(customLocationC(), false).toBool();
+    folder.prefetchThumbnails = settings.value(prefetchThumbnailsC(), false).toBool();
 
     folder.virtualFilesMode = Vfs::Mode::Off;
 

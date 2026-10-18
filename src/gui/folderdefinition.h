@@ -49,6 +49,9 @@ public:
      */
     bool customLocation = false;
 
+    /// Keep thumbnails of all images available locally (virtual files on Windows), see ThumbnailServer
+    bool prefetchThumbnails = false;
+
     /// Saves the folder definition into the current settings.
     static void save(QSettings &settings, const FolderDefinition &folder);
 
