@@ -4,15 +4,13 @@
  */
 
 #pragma once
-#include "thumbnailprovideripc.h"
-
-#include "config.h"
-#include "thumbcache.h"
+#include "configvfscfapishellext.h"
 
 #include <QString>
 
 #include <comdef.h>
-#include <ntstatus.h>
+#include <shobjidl.h>
+#include <thumbcache.h>
 
 namespace VfsShellExtensions {
 std::pair<HBITMAP, WTS_ALPHATYPE> hBitmapAndAlphaTypeFromData(const QByteArray &thumbnailData);
@@ -41,6 +39,5 @@ private:
 
     IShellItem2Ptr _shellItem;
     QString _shellItemPath;
-    ThumbnailProviderIpc _thumbnailProviderIpc;
 };
 }

@@ -35,9 +35,9 @@
 #undef byte
 
 #include "thumbnailprovider.h"
-#include <QSize>
+#include "thumbnailprovideripc.h"
+
 #include <shlwapi.h>
-#include <vector>
 
 extern long dllObjectsCount;
 
@@ -46,40 +46,36 @@ namespace VfsShellExtensions {
 std::pair<HBITMAP, WTS_ALPHATYPE> hBitmapAndAlphaTypeFromData(const QByteArray &thumbnailData)
 {
     if (thumbnailData.isEmpty()) {
-        return {NULL, WTSAT_UNKNOWN};
+        return {nullptr, WTSAT_UNKNOWN};
     }
 
-    Gdiplus::Bitmap *gdiPlusBitmap = nullptr;
     ULONG_PTR gdiPlusToken;
     Gdiplus::GdiplusStartupInput gdiPlusStartupInput;
     if (Gdiplus::GdiplusStartup(&gdiPlusToken, &gdiPlusStartupInput, nullptr) != Gdiplus::Status::Ok) {
-        return {NULL, WTSAT_UNKNOWN};
+        return {nullptr, WTSAT_UNKNOWN};
     }
 
-    const auto handleFailure = [gdiPlusToken]() -> std::pair<HBITMAP, WTS_ALPHATYPE> {
-        Gdiplus::GdiplusShutdown(gdiPlusToken);
-        return {NULL, WTSAT_UNKNOWN};
-    };
-
-    const std::vector<unsigned char> bitmapData(thumbnailData.begin(), thumbnailData.end());
-    auto const stream{::SHCreateMemStream(&bitmapData[0], static_cast<UINT>(bitmapData.size()))};
-
-    if (!stream) {
-        return handleFailure();
-    }
-    gdiPlusBitmap = Gdiplus::Bitmap::FromStream(stream);
-
+    HBITMAP hBitmap = nullptr;
     auto hasAlpha = false;
-    HBITMAP hBitmap = NULL;
-    if (gdiPlusBitmap) {
-        hasAlpha = Gdiplus::IsAlphaPixelFormat(gdiPlusBitmap->GetPixelFormat());
-        if (gdiPlusBitmap->GetHBITMAP(Gdiplus::Color(0, 0, 0), &hBitmap) != Gdiplus::Status::Ok) {
-            return handleFailure();
+    if (IStream *stream = ::SHCreateMemStream(reinterpret_cast<const BYTE *>(thumbnailData.constData()), static_cast<UINT>(thumbnailData.size()))) {
+        // the bitmap reads from the stream, so it must be gone before the stream is released and GDI+ is shut down
+        if (auto *gdiPlusBitmap = Gdiplus::Bitmap::FromStream(stream)) {
+            if (gdiPlusBitmap->GetLastStatus() == Gdiplus::Status::Ok) {
+                hasAlpha = Gdiplus::IsAlphaPixelFormat(gdiPlusBitmap->GetPixelFormat());
+                if (gdiPlusBitmap->GetHBITMAP(Gdiplus::Color(0, 0, 0, 0), &hBitmap) != Gdiplus::Status::Ok) {
+                    hBitmap = nullptr;
+                }
+            }
+            delete gdiPlusBitmap;
         }
+        stream->Release();
     }
 
     Gdiplus::GdiplusShutdown(gdiPlusToken);
 
+    if (!hBitmap) {
+        return {nullptr, WTSAT_UNKNOWN};
+    }
     return {hBitmap, hasAlpha ? WTSAT_ARGB : WTSAT_RGB};
 }
 
@@ -119,18 +115,20 @@ IFACEMETHODIMP_(ULONG) ThumbnailProvider::Release()
 
 IFACEMETHODIMP ThumbnailProvider::Initialize(_In_ IShellItem *item, _In_ DWORD mode)
 {
+    Q_UNUSED(mode)
     HRESULT hresult = item->QueryInterface(__uuidof(_shellItem), reinterpret_cast<void **>(&_shellItem));
     if (FAILED(hresult)) {
         return hresult;
     }
 
-    LPWSTR pszName = NULL;
+    LPWSTR pszName = nullptr;
     hresult = _shellItem->GetDisplayName(SIGDN_FILESYSPATH, &pszName);
     if (FAILED(hresult)) {
         return hresult;
     }
 
     _shellItemPath = QString::fromWCharArray(pszName);
+    CoTaskMemFree(pszName);
 
     return S_OK;
 }
@@ -140,8 +138,8 @@ IFACEMETHODIMP ThumbnailProvider::GetThumbnail(_In_ UINT cx, _Out_ HBITMAP *bitm
     *bitmap = nullptr;
     *alphaType = WTSAT_UNKNOWN;
 
-    const auto thumbnailDataReceived = _thumbnailProviderIpc.fetchThumbnailForFile(_shellItemPath, QSize(cx, cx));
-
+    // any failure makes Explorer fall back to the regular icon
+    const auto thumbnailDataReceived = ThumbnailProviderIpc::fetchThumbnailForFile(_shellItemPath, static_cast<int>(cx));
     if (thumbnailDataReceived.isEmpty()) {
         return E_FAIL;
     }

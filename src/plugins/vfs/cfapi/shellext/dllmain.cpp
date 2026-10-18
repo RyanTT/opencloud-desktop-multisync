@@ -4,29 +4,25 @@
  */
 
 #include "cfapishellintegrationclassfactory.h"
-#include "customstateprovider.h"
 #include "thumbnailprovider.h"
 #include <comdef.h>
+#include <new>
 
 long dllReferenceCount = 0;
 long dllObjectsCount = 0;
 
 HINSTANCE instanceHandle = nullptr;
 
-HRESULT CustomStateProvider_CreateInstance(REFIID riid, void **ppv);
 HRESULT ThumbnailProvider_CreateInstance(REFIID riid, void **ppv);
 
+// the custom state (overlay) provider is not built, only thumbnails are served
 const VfsShellExtensions::ClassObjectInit listClassesSupported[] = {
-    {&__uuidof(winrt::CfApiShellExtensions::implementation::CustomStateProvider), CustomStateProvider_CreateInstance},
     {&__uuidof(VfsShellExtensions::ThumbnailProvider), ThumbnailProvider_CreateInstance}};
 
 STDAPI_(BOOL) DllMain(HINSTANCE hInstance, DWORD dwReason, void *)
 {
     if (dwReason == DLL_PROCESS_ATTACH) {
         instanceHandle = hInstance;
-        wchar_t dllFilePath[_MAX_PATH] = {0};
-        ::GetModuleFileName(instanceHandle, dllFilePath, _MAX_PATH);
-        winrt::CfApiShellExtensions::implementation::CustomStateProvider::setDllFilePath(dllFilePath);
         DisableThreadLibraryCalls(hInstance);
     }
 
@@ -41,16 +37,6 @@ STDAPI DllCanUnloadNow()
 STDAPI DllGetClassObject(REFCLSID clsid, REFIID riid, void **ppv)
 {
     return VfsShellExtensions::CfApiShellIntegrationClassFactory::CreateInstance(clsid, listClassesSupported, ARRAYSIZE(listClassesSupported), riid, ppv);
-}
-
-HRESULT CustomStateProvider_CreateInstance(REFIID riid, void **ppv)
-{
-    try {
-        const auto customStateProvider = winrt::make_self<winrt::CfApiShellExtensions::implementation::CustomStateProvider>();
-        return customStateProvider->QueryInterface(riid, ppv);
-    } catch (_com_error exc) {
-        return exc.Error();
-    }
 }
 
 HRESULT ThumbnailProvider_CreateInstance(REFIID riid, void **ppv)

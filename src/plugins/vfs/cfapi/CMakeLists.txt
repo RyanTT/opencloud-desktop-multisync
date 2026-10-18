@@ -1,4 +1,6 @@
 if (WIN32)
+    add_subdirectory(shellext)
+
     add_vfs_plugin(NAME cfapi
         SRC
             cfapiwrapper.cpp

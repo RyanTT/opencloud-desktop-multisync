@@ -1,11 +1,23 @@
 /*
  * SPDX-FileCopyrightText: 2022 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-FileCopyrightText: 2026 OpenCloud contributors
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#ifndef CONFIG_VFS_CFAPI_SHELLEXT_H
-#define CONFIG_VFS_CFAPI_SHELLEXT_H
-#cmakedefine CUSTOM_STATE_ICON_LOCKED_INDEX "@CUSTOM_STATE_ICON_LOCKED_INDEX@"
-#cmakedefine CUSTOM_STATE_ICON_SHARED_INDEX "@CUSTOM_STATE_ICON_SHARED_INDEX@"
-#cmakedefine CUSTOM_STATE_ICON_INDEX_OFFSET "@CUSTOM_STATE_ICON_INDEX_OFFSET@"
-#endif
+#pragma once
+
+// shared by the shell extension DLL and the cfapi vfs plugin that registers it
+
+// used to derive the name of the client's local server
+#define CFAPI_SHELLEXT_APPLICATION_NAME "@APPLICATION_SHORTNAME@"
+
+// file name of the shell extension DLL, without extension, installed next to the client executable
+#define CFAPI_SHELL_EXTENSIONS_LIB_NAME "@CFAPI_SHELL_EXTENSIONS_LIB_NAME@"
+
+// the ids are derived from the application name, so differently branded or beta builds don't overwrite each other
+#define CFAPI_SHELLEXT_THUMBNAIL_HANDLER_CLASS_ID "@CFAPI_SHELLEXT_THUMBNAIL_HANDLER_CLASS_ID@"
+#define CFAPI_SHELLEXT_THUMBNAIL_HANDLER_CLASS_ID_REG "{@CFAPI_SHELLEXT_THUMBNAIL_HANDLER_CLASS_ID@}"
+#define CFAPI_SHELLEXT_THUMBNAIL_HANDLER_DISPLAY_NAME "@APPLICATION_SHORTNAME@ Thumbnail Handler"
+
+#define CFAPI_SHELLEXT_APPID_REG "{@CFAPI_SHELLEXT_APPID@}"
+#define CFAPI_SHELLEXT_APPID_DISPLAY_NAME "@APPLICATION_SHORTNAME@ Shell Extensions"
