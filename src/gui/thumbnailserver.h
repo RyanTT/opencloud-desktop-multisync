@@ -83,6 +83,7 @@ private:
     void fetchFromServer(Folder *folder, const QString &relativePath, const QString &etag, int size, bool background,
         const std::function<void(const QImage &image, int status)> &done);
 
+    bool isScanned(Folder *folder) const;
     void scanFolder(Folder *folder);
     void scanEnabledFolders();
     void enqueue(Folder *folder, const QString &relativePath);

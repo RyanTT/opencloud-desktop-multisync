@@ -66,7 +66,7 @@ bool hasPreviewableExtension(const QString &path)
 
 bool isPrefetchCandidate(const OCC::SyncJournalFileRecord &record)
 {
-    return record.isValid() && record.type() != OCC::ItemTypeDirectory && record.size() <= maxFileSize && hasPreviewableExtension(record.path());
+    return record.isValid() && !record.isDirectory() && record.size() <= maxFileSize && hasPreviewableExtension(record.path());
 }
 
 bool isNoPreviewStatus(int status)
@@ -336,7 +336,7 @@ void ThumbnailServer::setPrefetchEnabled(Folder *folder, bool enabled)
     }
 
     qCInfo(lcThumbnailServer) << u"No longer keeping thumbnails available for" << folder->path();
-    _scannedFolders.removeAll(folder);
+    _scannedFolders.removeIf([folder](const QPointer<Folder> &scanned) { return scanned.data() == folder; });
     _progress.remove(folder);
     folder->setThumbnailProgress(Folder::ThumbnailState::Idle, 0, 0);
     // queued items of the folder are dropped when they come up, remove what is stored
@@ -349,17 +349,22 @@ void ThumbnailServer::setPrefetchEnabled(Folder *folder, bool enabled)
 
 void ThumbnailServer::scanEnabledFolders()
 {
-    _scannedFolders.removeAll(nullptr);
+    _scannedFolders.removeIf([](const QPointer<Folder> &scanned) { return scanned.isNull(); });
     for (auto *folder : FolderMan::instance()->folders()) {
-        if (folder->isReady() && folder->prefetchThumbnails() && !_scannedFolders.contains(folder)) {
+        if (folder->isReady() && folder->prefetchThumbnails() && !isScanned(folder)) {
             scanFolder(folder);
         }
     }
 }
 
+bool ThumbnailServer::isScanned(Folder *folder) const
+{
+    return std::any_of(_scannedFolders.cbegin(), _scannedFolders.cend(), [folder](const QPointer<Folder> &scanned) { return scanned.data() == folder; });
+}
+
 void ThumbnailServer::scanFolder(Folder *folder)
 {
-    if (!_scannedFolders.contains(folder)) {
+    if (!isScanned(folder)) {
         _scannedFolders.append(folder);
     }
     // whether a thumbnail is needed is checked when the item comes up, the scan is a single query
@@ -500,7 +505,7 @@ void ThumbnailServer::updateProgress()
             it = _progress.erase(it);
             continue;
         }
-        const auto deferred = std::count_if(_prefetchDeferred.cbegin(), _prefetchDeferred.cend(), [folder](const PrefetchItem &item) { return item.folder == folder; });
+        const auto deferred = std::count_if(_prefetchDeferred.cbegin(), _prefetchDeferred.cend(), [folder](const PrefetchItem &item) { return item.folder.data() == folder; });
         auto state = Folder::ThumbnailState::Running;
         if (NetworkInformation::instance()->isMetered()) {
             state = Folder::ThumbnailState::PausedMetered;
