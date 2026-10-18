@@ -3,36 +3,20 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-//  global compilation flag configuring windows sdk headers
-//  preventing inclusion of min and max macros clashing with <limits>
-#define NOMINMAX 1
-
-//  override byte to prevent clashes with <cstddef>
-#define byte win_byte_override
-
-#include <Windows.h> // gdi plus requires Windows.h
-// ...includes for other windows header that may use byte...
-
-//  Define min max macros required by GDI+ headers.
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#else
-#error max macro is already defined
+// GDI+ needs IStream/PROPID (objidl.h, left out with WIN32_LEAN_AND_MEAN) and min/max (disabled by NOMINMAX)
+#ifndef NOMINMAX
+#define NOMINMAX
 #endif
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#else
-#error min macro is already defined
-#endif
+#include <windows.h>
 
+#include <objidl.h>
+
+#include <algorithm>
+namespace Gdiplus {
+using std::max;
+using std::min;
+}
 #include <gdiplus.h>
-
-//  Undefine min max macros so they won't collide with <limits> header content.
-#undef min
-#undef max
-
-//  Undefine byte macros so it won't collide with <cstddef> header content.
-#undef byte
 
 #include "thumbnailprovider.h"
 #include "thumbnailprovideripc.h"
