@@ -44,6 +44,7 @@
 
 #if defined(Q_OS_WIN)
 #include "gui/navigationpanehelper.h"
+#include "gui/thumbnailserver.h"
 #include <qt_windows.h>
 #endif
 
@@ -171,6 +172,9 @@ Application::Application(const QString &displayLanguage, bool debugMode)
 #ifdef Q_OS_WIN
     // update the existing sidebar entries
     NavigationPaneHelper::removeLegacyCloudStorageRegistry();
+
+    // answers the Explorer shell extension's thumbnail requests for files in virtual file sync roots
+    new ThumbnailServer(this);
 #endif
 }
 
