@@ -1186,6 +1186,26 @@ This means that the synchronization client might not upload local changes immedi
 %1</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <location filename="../src/gui/folder.cpp" line="456"/>
+        <source>Thumbnails %1 of %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/folder.cpp" line="458"/>
+        <source>Thumbnails paused (metered connection) · %1 of %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/folder.cpp" line="460"/>
+        <source>Thumbnails paused (offline) · %1 of %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/folder.cpp" line="462"/>
+        <source>Thumbnails waiting for the server · %1 of %2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>OCC::FolderMan</name>

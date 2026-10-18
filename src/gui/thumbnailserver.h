@@ -88,6 +88,11 @@ private:
     void enqueue(Folder *folder, const QString &relativePath);
     void processPrefetchQueue();
 
+    // progress per folder, shown in the folder list next to the sync progress
+    void itemFinished(Folder *folder);
+    void scheduleProgressUpdate();
+    void updateProgress();
+
     QLocalServer _server;
     ThumbnailStore _store;
     // thumbnails larger than the stored size (Explorer's preview pane), in memory only, the cost is the size in bytes
@@ -103,5 +108,14 @@ private:
     int _prefetchRunning = 0;
     QTimer _prefetchRetryTimer;
     QList<QPointer<Folder>> _scannedFolders;
+
+    struct FolderProgress
+    {
+        qint64 done = 0;
+        qint64 total = 0;
+    };
+    // the current pass per folder, a pass ends when everything queued for the folder is handled
+    QHash<Folder *, FolderProgress> _progress;
+    QTimer _progressTimer;
 };
 }

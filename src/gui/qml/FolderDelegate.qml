@@ -240,17 +240,60 @@ Pane {
                                         elide: Text.ElideMiddle
                                         text: folderDelegate.itemText
                                     }
+                                    // thumbnail prefetching runs independently of the sync, so it gets its own, lighter row
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        visible: folderDelegate.folder.thumbnailProgressVisible
+                                        opacity: 0.75
+
+                                        ProgressBar {
+                                            Layout.preferredWidth: parent.width / 3
+                                            value: folderDelegate.folder.thumbnailProgress
+                                            // paused states come without a bar
+                                            visible: folderDelegate.folder.thumbnailProgress >= 0
+                                        }
+                                        Label {
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                            text: folderDelegate.folder.thumbnailStatus
+                                            Accessible.name: text
+                                        }
+                                    }
                                 }
                             }
                             Component {
                                 id: quotaDisplay
 
-                                Label {
-                                    Accessible.ignored: true
+                                ColumnLayout {
                                     Layout.fillWidth: true
-                                    elide: Text.ElideRight
-                                    text: folderDelegate.quota
-                                    visible: folderDelegate.quota && !folderDelegate.overallText
+
+                                    // thumbnail prefetching runs independently of the sync, so it gets its own, lighter row
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        visible: folderDelegate.folder.thumbnailProgressVisible
+                                        opacity: 0.75
+
+                                        ProgressBar {
+                                            Layout.preferredWidth: parent.width / 3
+                                            value: folderDelegate.folder.thumbnailProgress
+                                            // paused states come without a bar
+                                            visible: folderDelegate.folder.thumbnailProgress >= 0
+                                        }
+                                        Label {
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                            text: folderDelegate.folder.thumbnailStatus
+                                            Accessible.name: text
+                                        }
+                                    }
+                                    // thumbnail progress takes the place of the quota while it runs
+                                    Label {
+                                        Accessible.ignored: true
+                                        Layout.fillWidth: true
+                                        elide: Text.ElideRight
+                                        text: folderDelegate.quota
+                                        visible: folderDelegate.quota && !folderDelegate.overallText && !folderDelegate.folder.thumbnailProgressVisible
+                                    }
                                 }
                             }
 

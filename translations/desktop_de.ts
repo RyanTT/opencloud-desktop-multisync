@@ -1169,6 +1169,26 @@ Das bedeutet, dass der Synchronisierungs-Client möglicherweise lokale Veränder
 
 %1 </translation>
     </message>
+    <message>
+        <location filename="../src/gui/folder.cpp" line="456"/>
+        <source>Thumbnails %1 of %2</source>
+        <translation>Vorschaubilder %1 von %2</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/folder.cpp" line="458"/>
+        <source>Thumbnails paused (metered connection) · %1 of %2</source>
+        <translation>Vorschaubilder pausiert (getaktete Verbindung) · %1 von %2</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/folder.cpp" line="460"/>
+        <source>Thumbnails paused (offline) · %1 of %2</source>
+        <translation>Vorschaubilder pausiert (offline) · %1 von %2</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/folder.cpp" line="462"/>
+        <source>Thumbnails waiting for the server · %1 of %2</source>
+        <translation>Vorschaubilder warten auf den Server · %1 von %2</translation>
+    </message>
 </context>
 <context>
     <name>OCC::FolderMan</name>

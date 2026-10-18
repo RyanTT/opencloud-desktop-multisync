@@ -136,6 +136,10 @@ ThumbnailServer::ThumbnailServer(QObject *parent)
         processPrefetchQueue();
     });
     connect(NetworkInformation::instance(), &NetworkInformation::isMeteredChanged, this, &ThumbnailServer::processPrefetchQueue);
+    // don't update the UI for every single thumbnail
+    _progressTimer.setSingleShot(true);
+    _progressTimer.setInterval(250ms);
+    connect(&_progressTimer, &QTimer::timeout, this, &ThumbnailServer::updateProgress);
 
     QTimer::singleShot(initialScanDelay, this, [this] {
         scanEnabledFolders();
@@ -333,6 +337,8 @@ void ThumbnailServer::setPrefetchEnabled(Folder *folder, bool enabled)
 
     qCInfo(lcThumbnailServer) << u"No longer keeping thumbnails available for" << folder->path();
     _scannedFolders.removeAll(folder);
+    _progress.remove(folder);
+    folder->setThumbnailProgress(Folder::ThumbnailState::Idle, 0, 0);
     // queued items of the folder are dropped when they come up, remove what is stored
     folder->journalDb()->getFilesBelowPath(QString(), [this](const SyncJournalFileRecord &record) {
         if (isPrefetchCandidate(record)) {
@@ -372,6 +378,8 @@ void ThumbnailServer::enqueue(Folder *folder, const QString &relativePath)
     if (!_prefetchQueued.contains(id)) {
         _prefetchQueued.insert(id);
         _prefetchQueue.append({folder, relativePath});
+        ++_progress[folder].total;
+        scheduleProgressUpdate();
     }
 }
 
@@ -390,6 +398,7 @@ void ThumbnailServer::processPrefetchQueue()
         if (!folder || !folder->prefetchThumbnails() || !folder->isReady()) {
             if (folder) {
                 _prefetchQueued.remove(absolutePath(folder, item.relativePath));
+                itemFinished(folder);
             }
             continue;
         }
@@ -397,17 +406,20 @@ void ThumbnailServer::processPrefetchQueue()
         const auto record = folder->journalDb()->getFileRecord(item.relativePath);
         if (!isPrefetchCandidate(record)) {
             _prefetchQueued.remove(id);
+            itemFinished(folder);
             continue;
         }
         const auto key = ThumbnailStore::keyFor(record.fileId(), record.etag());
         if (_store.contains(key)) {
             _prefetchQueued.remove(id);
+            itemFinished(folder);
             continue;
         }
 
         if (isHydrated(folder, item.relativePath)) {
             ++localItems;
             _prefetchQueued.remove(id);
+            itemFinished(folder);
             const auto image = generateLocally(folder, item.relativePath, ThumbnailStore::StoredSize);
             if (image.isNull()) {
                 _store.markNoPreview(key);
@@ -421,6 +433,7 @@ void ThumbnailServer::processPrefetchQueue()
             // keep the item, try again later
             _prefetchQueue.prepend(item);
             _prefetchRetryTimer.start();
+            scheduleProgressUpdate();
             return;
         }
 
@@ -431,21 +444,73 @@ void ThumbnailServer::processPrefetchQueue()
             if (!image.isNull()) {
                 _store.store(key, image);
                 _prefetchQueued.remove(id);
+                itemFinished(item.folder);
             } else if (isNoPreviewStatus(status)) {
                 _store.markNoPreview(key);
                 _prefetchQueued.remove(id);
+                itemFinished(item.folder);
             } else if (item.attempts < maxPrefetchAttempts) {
                 // e.g. 425 while the server is still processing the file, or 429
                 _prefetchDeferred.append(item);
                 _prefetchRetryTimer.start();
             } else {
                 _prefetchQueued.remove(id);
+                itemFinished(item.folder);
             }
+            scheduleProgressUpdate();
             if (_prefetchQueue.isEmpty() && _prefetchDeferred.isEmpty() && _prefetchRunning == 0) {
                 qCInfo(lcThumbnailServer) << u"Thumbnail prefetch queue is done";
             }
             processPrefetchQueue();
         });
+    }
+}
+
+void ThumbnailServer::itemFinished(Folder *folder)
+{
+    if (!folder) {
+        return;
+    }
+    if (const auto it = _progress.find(folder); it != _progress.end()) {
+        ++it->done;
+        scheduleProgressUpdate();
+    }
+}
+
+void ThumbnailServer::scheduleProgressUpdate()
+{
+    if (!_progressTimer.isActive()) {
+        _progressTimer.start();
+    }
+}
+
+void ThumbnailServer::updateProgress()
+{
+    const auto &folders = FolderMan::instance()->folders();
+    for (auto it = _progress.begin(); it != _progress.end();) {
+        auto *folder = it.key();
+        if (!folders.contains(folder)) {
+            it = _progress.erase(it);
+            continue;
+        }
+        const auto remaining = it->total - it->done;
+        if (remaining <= 0) {
+            // the pass is complete, the next new image starts a new one
+            folder->setThumbnailProgress(Folder::ThumbnailState::Idle, 0, 0);
+            it = _progress.erase(it);
+            continue;
+        }
+        const auto deferred = std::count_if(_prefetchDeferred.cbegin(), _prefetchDeferred.cend(), [folder](const PrefetchItem &item) { return item.folder == folder; });
+        auto state = Folder::ThumbnailState::Running;
+        if (NetworkInformation::instance()->isMetered()) {
+            state = Folder::ThumbnailState::PausedMetered;
+        } else if (!folder->accountState()->isConnected()) {
+            state = Folder::ThumbnailState::PausedOffline;
+        } else if (deferred >= remaining) {
+            state = Folder::ThumbnailState::WaitingForServer;
+        }
+        folder->setThumbnailProgress(state, it->done, it->total);
+        ++it;
     }
 }
 }

@@ -51,6 +51,7 @@
 
 
 #include <QDir>
+#include <QLocale>
 #include <QSettings>
 #include <QTimer>
 #include <QUrl>
@@ -417,6 +418,50 @@ bool Folder::isCustomLocation() const
 bool Folder::prefetchThumbnails() const
 {
     return _definition.prefetchThumbnails;
+}
+
+void Folder::setThumbnailProgress(ThumbnailState state, qint64 done, qint64 total)
+{
+    if (state == _thumbnailState && done == _thumbnailsDone && total == _thumbnailsTotal) {
+        return;
+    }
+    _thumbnailState = state;
+    _thumbnailsDone = done;
+    _thumbnailsTotal = total;
+    Q_EMIT thumbnailProgressChanged();
+}
+
+bool Folder::thumbnailProgressVisible() const
+{
+    return _thumbnailState != ThumbnailState::Idle && _thumbnailsTotal > 0;
+}
+
+double Folder::thumbnailProgress() const
+{
+    if (_thumbnailState != ThumbnailState::Running || _thumbnailsTotal <= 0) {
+        return -1;
+    }
+    return static_cast<double>(_thumbnailsDone) / static_cast<double>(_thumbnailsTotal);
+}
+
+QString Folder::thumbnailStatus() const
+{
+    const QLocale locale;
+    const auto done = locale.toString(_thumbnailsDone);
+    const auto total = locale.toString(_thumbnailsTotal);
+    switch (_thumbnailState) {
+    case ThumbnailState::Idle:
+        return {};
+    case ThumbnailState::Running:
+        return tr("Thumbnails %1 of %2").arg(done, total);
+    case ThumbnailState::PausedMetered:
+        return tr("Thumbnails paused (metered connection) · %1 of %2").arg(done, total);
+    case ThumbnailState::PausedOffline:
+        return tr("Thumbnails paused (offline) · %1 of %2").arg(done, total);
+    case ThumbnailState::WaitingForServer:
+        return tr("Thumbnails waiting for the server · %1 of %2").arg(done, total);
+    }
+    Q_UNREACHABLE_RETURN({});
 }
 
 void Folder::setPrefetchThumbnails(bool prefetch)

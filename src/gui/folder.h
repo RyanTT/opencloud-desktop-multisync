@@ -62,6 +62,9 @@ class OPENCLOUD_GUI_EXPORT Folder : public QObject
     Q_PROPERTY(bool isDeployed READ isDeployed CONSTANT)
     Q_PROPERTY(Vfs::Mode vfsMode READ vfsMode CONSTANT)
     Q_PROPERTY(bool prefetchThumbnails READ prefetchThumbnails NOTIFY prefetchThumbnailsChanged)
+    Q_PROPERTY(bool thumbnailProgressVisible READ thumbnailProgressVisible NOTIFY thumbnailProgressChanged)
+    Q_PROPERTY(double thumbnailProgress READ thumbnailProgress NOTIFY thumbnailProgressChanged)
+    Q_PROPERTY(QString thumbnailStatus READ thumbnailStatus NOTIFY thumbnailProgressChanged)
     QML_ELEMENT
     QML_UNCREATABLE("Folders can only be created by the FolderManager")
 
@@ -126,6 +129,18 @@ public:
      */
     bool prefetchThumbnails() const;
     void setPrefetchThumbnails(bool prefetch);
+
+    enum class ThumbnailState : uint8_t { Idle, Running, PausedMetered, PausedOffline, WaitingForServer };
+    Q_ENUM(ThumbnailState)
+    /**
+     * Progress of the current thumbnail prefetch pass, reported by the ThumbnailServer.
+     * done counts every image handled in this pass, including the ones that were already available.
+     */
+    void setThumbnailProgress(ThumbnailState state, qint64 done, qint64 total);
+    bool thumbnailProgressVisible() const;
+    // 0..1, -1 while paused (no bar)
+    double thumbnailProgress() const;
+    QString thumbnailStatus() const;
 
     /**
      * switch sync on or off
@@ -260,6 +275,7 @@ Q_SIGNALS:
     void isReadyChanged();
     void isSyncRunningChanged();
     void prefetchThumbnailsChanged();
+    void thumbnailProgressChanged();
 
     void webUrlChanged();
 
@@ -325,6 +341,9 @@ private Q_SLOTS:
     void slotWatcherUnreliable(const QString &message);
 
 private:
+    ThumbnailState _thumbnailState = ThumbnailState::Idle;
+    qint64 _thumbnailsDone = 0;
+    qint64 _thumbnailsTotal = 0;
     /** Create a new Folder
      */
     Folder(const FolderDefinition &definition, const AccountStatePtr &accountState, std::unique_ptr<Vfs> &&vfs, QObject *parent = nullptr);
