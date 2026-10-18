@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - work/custom-sync-locations
+      # feature branches get a test build (artifacts only, no beta release)
+      - 'feat/**'
       - 'stable-[0-9]+.[0-9]+'
       - 'stable-[0-9]+.[0-9]+.[0-9]+'
   pull_request:
@@ -255,7 +257,7 @@ jobs:
         & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --package opencloud/opencloud-desktop
 
     - name: Package for testing
-      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/work/custom-sync-locations' }}
+      if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/work/custom-sync-locations' || startsWith(github.ref, 'refs/heads/feat/') }}
       run: |
         if ($isLinux) {
           # its always an appimage on linux
@@ -265,7 +267,7 @@ jobs:
         }
 
     - name: Package installer (NSIS, unsigned, test branch only)
-      if: ${{ startsWith(matrix.os, 'windows-') && github.ref == 'refs/heads/work/custom-sync-locations' }}
+      if: ${{ startsWith(matrix.os, 'windows-') && (github.ref == 'refs/heads/work/custom-sync-locations' || startsWith(github.ref, 'refs/heads/feat/')) }}
       run: |
         & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --package --options "[Packager]PackageType=NullsoftInstallerPackager" opencloud/opencloud-desktop
 
@@ -287,7 +289,7 @@ jobs:
         Remove-Item -force "${{ matrix.signing.keyfile_file_path }}\${{ matrix.signing.keyfile_file_name }}"
 
     - name: Package msix
-      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/work/custom-sync-locations' }}
+      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/work/custom-sync-locations' && !startsWith(github.ref, 'refs/heads/feat/') }}
       run: |
         & "${env:GITHUB_WORKSPACE}/.github/workflows/.craft.ps1" -c --no-cache --package --options "[Packager]PackageType=AppxPackager" --options "[Packager]Destination=${{ github.workspace }}/msix/" opencloud/opencloud-desktop
         Move-Item -Path "${{ github.workspace }}/msix/*.msix" -Destination "${{ github.workspace }}/msix/OpenCloud_Desktop-${{ github.run_number }}.msix" -Force
@@ -319,7 +321,7 @@ jobs:
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     - name: Upload store msix
-      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/work/custom-sync-locations' }}
+      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/work/custom-sync-locations' && !startsWith(github.ref, 'refs/heads/feat/') }}
       uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.target }}-store-msix-${{ github.run_number }}
@@ -328,7 +330,7 @@ jobs:
 
     - name: Upload unsigned msix
       id: upload-unsigned-artifact
-      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/work/custom-sync-locations' }}
+      if: ${{ startsWith(matrix.os, 'windows-') && github.event_name != 'pull_request' && github.ref != 'refs/heads/work/custom-sync-locations' && !startsWith(github.ref, 'refs/heads/feat/') }}
       uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.target }}-msix-unsigned-temp-${{ github.run_number }}
