@@ -92,7 +92,9 @@ time_t FileSystem::getModTime(const std::filesystem::path &filename)
     std::error_code rc;
     const auto fileTime = std::filesystem::last_write_time(filename, rc);
     if (rc) {
-        Q_ASSERT(!rc);
+        // the file can legitimately vanish or be locked between discovery and propagation (e.g. browser temp files),
+        // callers have to cope with the fallback value and re-check the file themselves
+        qCWarning(lcFileSystem) << u"Error reading mtime for" << filename << u"failed: rc" << rc.value() << u", error message:" << rc.message();
         return std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     } else {
         return fileTimeToTime_t(fileTime);
@@ -105,7 +107,6 @@ bool FileSystem::setModTime(const std::filesystem::path &filename, time_t modTim
     std::filesystem::last_write_time(filename, time_tToFileTime(modTime), rc);
     if (rc) {
         qCWarning(lcFileSystem) << u"Error setting mtime for" << filename << u"failed: rc" << rc.value() << u", error message:" << rc.message();
-        Q_ASSERT(!rc);
         return false;
     }
     return true;

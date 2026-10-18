@@ -1090,7 +1090,10 @@ void PropagateDirectory::slotSubJobsFinished(const SyncFileItem::Status status)
             if (_item->instruction() == CSYNC_INSTRUCTION_NEW && _item->_direction == SyncFileItem::Down) {
                 // special case for local MKDIR, set local directory mtime
                 // (it's not synced later at all, but can be nice to have it set initially)
-                OC_ASSERT(FileSystem::setModTime(propagator()->fullLocalPath(_item->destination()), _item->_modtime));
+                // the directory might already be gone again, that is not worth taking the client down
+                if (!FileSystem::setModTime(propagator()->fullLocalPath(_item->destination()), _item->_modtime)) {
+                    qCWarning(lcDirectory) << u"Failed to set the mtime of the new local directory" << _item->localName();
+                }
             }
             // For new directories we always want to update the etag once
             // the directory has been propagated. Otherwise the directory

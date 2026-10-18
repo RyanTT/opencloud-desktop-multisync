@@ -296,6 +296,11 @@ File synchronization desktop utility.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/gui/qml/FolderDelegate.qml" line="421"/>
+        <source>Add Custom Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/gui/qml/FolderDelegate.qml" line="423"/>
         <source>You are synchronizing %1 out of %2 Spaces</source>
         <translation type="unfinished"></translation>
@@ -864,6 +869,94 @@ The update will be performed in the background, and overwrite the current AppIma
     <message>
         <location filename="../src/libsync/creds/credentialmanager.cpp" line="222"/>
         <source>Failed to parse credentials %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>OCC::CustomFolderDialog</name>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="65"/>
+        <source>Sync a folder to a custom location</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="69"/>
+        <source>Choose a folder on the server and any folder on this computer to keep in sync. Pick the top entry to sync the whole Space.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="77"/>
+        <source>Space:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="81"/>
+        <source>Folder on the server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="88"/>
+        <source>Local folder, e.g. %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="89"/>
+        <source>Choose…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="93"/>
+        <source>Local folder:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="96"/>
+        <source>Use virtual files (download file contents on demand)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="114"/>
+        <source>Add sync</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="235"/>
+        <source>Could not load the list of folders from the server: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="247"/>
+        <source>Select the local folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="264"/>
+        <source>No Space available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="266"/>
+        <source>Select a folder on the server.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="271"/>
+        <source>Please enter an absolute path for the local folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="281"/>
+        <source>The selected server folder overlaps with the folder »%1« that is already synced to »%2«.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="301"/>
+        <source>The local folder is not empty. Its contents will be merged with the server folder: files that only exist locally will be uploaded, files that differ on both sides will be kept as conflict copies.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/customfolderdialog.cpp" line="304"/>
+        <source>The local folder will be created.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

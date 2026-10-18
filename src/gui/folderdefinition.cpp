@@ -47,6 +47,16 @@ auto priorityC()
 {
     return "priority";
 }
+
+auto remoteSubPathC()
+{
+    return "remoteSubPath";
+}
+
+auto customLocationC()
+{
+    return "customLocation";
+}
 }
 
 FolderDefinition::FolderDefinition(const QUuid &accountUuid, const QUrl &davUrl, const QString &spaceId, const QString &displayName)
@@ -85,6 +95,8 @@ void FolderDefinition::save(QSettings &settings, const FolderDefinition &folder)
     settings.setValue("ignoreHiddenFiles", folder.ignoreHiddenFiles);
     settings.setValue(deployedC(), folder.isDeployed());
     settings.setValue(priorityC(), folder.priority());
+    settings.setValue(remoteSubPathC(), folder.remoteSubPath());
+    settings.setValue(customLocationC(), folder.customLocation);
 
     settings.setValue("virtualFilesMode", Utility::enumToString(folder.virtualFilesMode));
 }
@@ -100,6 +112,8 @@ FolderDefinition FolderDefinition::load(QSettings &settings)
     folder.ignoreHiddenFiles = settings.value("ignoreHiddenFiles", QVariant(true)).toBool();
     folder._deployed = settings.value(deployedC(), false).toBool();
     folder._priority = settings.value(priorityC(), 0).toUInt();
+    folder.setRemoteSubPath(settings.value(remoteSubPathC()).toString());
+    folder.customLocation = settings.value(customLocationC(), false).toBool();
 
     folder.virtualFilesMode = Vfs::Mode::Off;
 
@@ -142,6 +156,29 @@ QString FolderDefinition::displayName() const
 void FolderDefinition::setDisplayName(const QString &s)
 {
     _displayName = s;
+}
+
+QString FolderDefinition::remoteSubPath() const
+{
+    return _remoteSubPath;
+}
+
+void FolderDefinition::setRemoteSubPath(const QString &path)
+{
+    _remoteSubPath = normaliseRemoteSubPath(path);
+}
+
+QString FolderDefinition::normaliseRemoteSubPath(const QString &path)
+{
+    // collapse duplicate separators, resolve "." and "..", then strip leading and trailing '/'
+    QString out = QDir::cleanPath(QDir::fromNativeSeparators(path).prepend(QLatin1Char('/')));
+    while (out.startsWith(QLatin1Char('/'))) {
+        out.remove(0, 1);
+    }
+    while (out.endsWith(QLatin1Char('/'))) {
+        out.chop(1);
+    }
+    return out;
 }
 
 bool FolderDefinition::isDeployed() const

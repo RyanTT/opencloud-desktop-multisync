@@ -54,6 +54,10 @@ ConnectionValidator::ConnectionValidator(AccountPtr account, QObject *parent)
     timer->setSingleShot(true);
     timer->setInterval(60s);
     connect(timer, &QTimer::timeout, this, [this] {
+        // a result might already have been reported, deleteLater() just did not run yet
+        if (_finished) {
+            return;
+        }
         qCWarning(lcConnectionValidator) << u"ConnectionValidator for" << _account->displayNameWithHost() << u"timed out after" << _duration;
         _errors.append(tr("timeout"));
         reportResult(Timeout);
@@ -166,12 +170,16 @@ void ConnectionValidator::slotStatusFound(const QUrl &url, const QJsonObject &in
 
 void ConnectionValidator::reportResult(Status status)
 {
-    if (OC_ENSURE(!_finished)) {
-        _finished = true;
-        qCDebug(lcConnectionValidator) << status << _duration;
-        Q_EMIT connectionResult(status, _errors);
-        deleteLater();
+    // Several paths can report (a job's error handler, the hard timeout, ...) and reporting tears down the account's
+    // network jobs, which can trigger further reports. Only the first one counts.
+    if (_finished) {
+        qCInfo(lcConnectionValidator) << u"Ignoring result" << status << u"for" << _account->displayNameWithHost() << u", a result was already reported";
+        return;
     }
+    _finished = true;
+    qCDebug(lcConnectionValidator) << status << _duration;
+    Q_EMIT connectionResult(status, _errors);
+    deleteLater();
 }
 
 } // namespace OCC

@@ -131,6 +131,12 @@ public:
     Folder *addFolderFromWizard(const AccountStatePtr &accountStatePtr, FolderDefinition &&definition, bool useVfs);
     Folder *addFolderFromFolderWizardResult(const AccountStatePtr &accountStatePtr, const SyncConnectionDescription &config);
 
+    /**
+     * Adds a folder that syncs remoteSubPath of a Space (empty for the whole Space) to an arbitrary local path.
+     */
+    Folder *addCustomFolder(const AccountStatePtr &accountStatePtr, const QUrl &spaceRootDavUrl, const QString &spaceId, const QString &displayName,
+        const QString &remoteSubPath, const QString &localPath, bool useVirtualFiles);
+
     /** Removes a folder */
     void removeFolder(Folder *);
 
@@ -260,7 +266,7 @@ private Q_SLOTS:
 private:
     explicit FolderMan();
 
-    [[nodiscard]] static bool prepareFolder(const QString &folder);
+    [[nodiscard]] static bool prepareFolder(const QString &folder, bool setFolderIcon = true);
 
     /** Adds a new folder, does not add it to the account settings and
      *  does not set an account on the new folder.

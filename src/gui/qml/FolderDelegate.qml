@@ -412,6 +412,24 @@ Pane {
                 }
 
                 Keys.onTabPressed: {
+                    addCustomSyncButton.forceActiveFocus(Qt.TabFocusReason);
+                }
+            }
+
+            Button {
+                id: addCustomSyncButton
+                text: qsTr("Add Custom Folder")
+
+                onClicked: {
+                    accountSettings.slotAddCustomFolder();
+                }
+                enabled: accountSettings.accountState.state === AccountState.Connected
+
+                Keys.onBacktabPressed: {
+                    addSyncButton.forceActiveFocus(Qt.TabFocusReason);
+                }
+
+                Keys.onTabPressed: {
                     widget.parentFocusWidget.focusNext();
                 }
             }
