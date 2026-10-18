@@ -301,6 +301,16 @@ File synchronization desktop utility.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/gui/qml/FolderDelegate.qml" line="385"/>
+        <source>Stop keeping thumbnails offline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/qml/FolderDelegate.qml" line="385"/>
+        <source>Keep thumbnails available offline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/gui/qml/FolderDelegate.qml" line="423"/>
         <source>You are synchronizing %1 out of %2 Spaces</source>
         <translation type="unfinished"></translation>
@@ -725,6 +735,21 @@ File synchronization desktop utility.</source>
     <message>
         <location filename="../src/gui/accountsettings.cpp" line="352"/>
         <source>The server version %1 is unsupported! Proceed at your own risk.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/accountsettings.cpp" line="262"/>
+        <source>Keep thumbnails available offline</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../src/gui/accountsettings.cpp" line="263"/>
+        <source>&lt;p&gt;Thumbnails of the %n image(s) in »%1« will be downloaded in the background and kept on this computer, including images added later. The images themselves stay online only.&lt;/p&gt;&lt;p&gt;This needs about %2 of disk space.&lt;/p&gt;</source>
+        <translation><numerusform>&lt;p&gt;Thumbnails of the %n image in »%1« will be downloaded in the background and kept on this computer, including images added later. The images themselves stay online only.&lt;/p&gt;&lt;p&gt;This needs about %2 of disk space.&lt;/p&gt;</numerusform><numerusform>&lt;p&gt;Thumbnails of the %n images in »%1« will be downloaded in the background and kept on this computer, including images added later. The images themselves stay online only.&lt;/p&gt;&lt;p&gt;This needs about %2 of disk space.&lt;/p&gt;</numerusform></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/accountsettings.cpp" line="270"/>
+        <source>Keep thumbnails</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

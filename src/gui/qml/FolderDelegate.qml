@@ -381,6 +381,14 @@ Pane {
                             }
 
                             MenuItem {
+                                // thumbnails of online only images, offered for virtual files on Windows
+                                text: folderDelegate.folder.prefetchThumbnails ? qsTr("Stop keeping thumbnails offline") : qsTr("Keep thumbnails available offline")
+                                onTriggered: accountSettings.slotSetPrefetchThumbnails(folderDelegate.folder, !folderDelegate.folder.prefetchThumbnails)
+                                visible: folderDelegate.folder.isReady && folderDelegate.folder.vfsMode === 1
+                                height: visible ? implicitHeight : 0
+                            }
+
+                            MenuItem {
                                 text: qsTr("Remove Space")
                                 onTriggered: accountSettings.slotRemoveCurrentFolder(folderDelegate.folder)
                                 visible: !folderDelegate.isDeployed

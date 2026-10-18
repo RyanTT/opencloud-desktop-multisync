@@ -99,6 +99,7 @@ protected Q_SLOTS:
     void slotEnableCurrentFolder(Folder *folder, bool terminate = false);
     void slotForceSyncCurrentFolder(Folder *folder);
     void slotRemoveCurrentFolder(Folder *folder);
+    void slotSetPrefetchThumbnails(Folder *folder, bool prefetch);
     void showSelectiveSyncDialog(Folder *folder);
     void slotFolderWizardAccepted();
     void slotDeleteAccount();

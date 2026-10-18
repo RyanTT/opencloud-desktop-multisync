@@ -302,6 +302,16 @@ Desktop-Client zur Dateisynchronisierung.</translation>
         <translation>Benutzerdefinierten Ordner hinzufügen</translation>
     </message>
     <message>
+        <location filename="../src/gui/qml/FolderDelegate.qml" line="385"/>
+        <source>Stop keeping thumbnails offline</source>
+        <translation>Vorschaubilder nicht mehr offline behalten</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/qml/FolderDelegate.qml" line="385"/>
+        <source>Keep thumbnails available offline</source>
+        <translation>Vorschaubilder offline verfügbar halten</translation>
+    </message>
+    <message>
         <location filename="../src/gui/qml/FolderDelegate.qml" line="423"/>
         <source>You are synchronizing %1 out of %2 Spaces</source>
         <translation>%1 von %2 Spaces werden synchronisiert</translation>
@@ -727,6 +737,21 @@ Desktop-Client zur Dateisynchronisierung.</translation>
         <location filename="../src/gui/accountsettings.cpp" line="352"/>
         <source>The server version %1 is unsupported! Proceed at your own risk.</source>
         <translation>Die Server-Version %1 wird nicht unterstützt. Fortfahren erfolgt auf eigene Gefahr.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/accountsettings.cpp" line="262"/>
+        <source>Keep thumbnails available offline</source>
+        <translation>Vorschaubilder offline verfügbar halten</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../src/gui/accountsettings.cpp" line="263"/>
+        <source>&lt;p&gt;Thumbnails of the %n image(s) in »%1« will be downloaded in the background and kept on this computer, including images added later. The images themselves stay online only.&lt;/p&gt;&lt;p&gt;This needs about %2 of disk space.&lt;/p&gt;</source>
+        <translation><numerusform>&lt;p&gt;Die Vorschaubilder von %n Bild in »%1« werden im Hintergrund heruntergeladen und auf diesem Computer behalten, auch für später hinzugefügte Bilder. Die Bilder selbst bleiben nur online verfügbar.&lt;/p&gt;&lt;p&gt;Dafür werden etwa %2 Speicherplatz benötigt.&lt;/p&gt;</numerusform><numerusform>&lt;p&gt;Die Vorschaubilder von %n Bildern in »%1« werden im Hintergrund heruntergeladen und auf diesem Computer behalten, auch für später hinzugefügte Bilder. Die Bilder selbst bleiben nur online verfügbar.&lt;/p&gt;&lt;p&gt;Dafür werden etwa %2 Speicherplatz benötigt.&lt;/p&gt;</numerusform></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/accountsettings.cpp" line="270"/>
+        <source>Keep thumbnails</source>
+        <translation>Vorschaubilder behalten</translation>
     </message>
 </context>
 <context>

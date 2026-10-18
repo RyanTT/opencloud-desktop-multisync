@@ -22,6 +22,7 @@
 #include "accountstate.h"
 #include "application.h"
 #include "common/restartmanager.h"
+#include "common/utility.h"
 #include "commonstrings.h"
 #include "configfile.h"
 #include "customfolderdialog.h"
@@ -43,6 +44,10 @@
 #include "resources/fonticon.h"
 #include "scheduling/syncscheduler.h"
 #include "settingsdialog.h"
+
+#ifdef Q_OS_WIN
+#include "gui/thumbnailserver.h"
+#endif
 
 #include <QSortFilterProxyModel>
 #include <QtQuickWidgets/QtQuickWidgets>
@@ -234,6 +239,47 @@ void AccountSettings::slotRemoveCurrentFolder(Folder *folder)
     messageBox->open();
 }
 
+void AccountSettings::slotSetPrefetchThumbnails(Folder *folder, bool prefetch)
+{
+#ifdef Q_OS_WIN
+    auto *server = ThumbnailServer::instance();
+    if (!server) {
+        return;
+    }
+    const auto apply = [folder, server, prefetch] {
+        folder->setPrefetchThumbnails(prefetch);
+        FolderMan::instance()->saveFolders();
+        server->setPrefetchEnabled(folder, prefetch);
+    };
+    if (!prefetch) {
+        apply();
+        return;
+    }
+
+    const auto estimate = server->estimatePrefetch(folder);
+    // a stored thumbnail is a 256 px JPEG, roughly 20 KB
+    const qint64 approximateBytes = estimate.missing * 20 * 1024;
+    auto messageBox = new FontIconMessageBox({Resources::FontIcon::DefaultGlyphes::Question}, tr("Keep thumbnails available offline"),
+        tr("<p>Thumbnails of the %n image(s) in »%1« will be downloaded in the background and kept on this computer, "
+           "including images added later. The images themselves stay online only.</p>"
+           "<p>This needs about %2 of disk space.</p>",
+            nullptr, static_cast<int>(estimate.images))
+            .arg(folder->displayName(), Utility::octetsToString(approximateBytes)),
+        QMessageBox::NoButton, ocApp()->settingsDialog());
+    messageBox->setAttribute(Qt::WA_DeleteOnClose);
+    QPushButton *yesButton = messageBox->addButton(tr("Keep thumbnails"), QMessageBox::YesRole);
+    messageBox->addButton(tr("Cancel"), QMessageBox::NoRole);
+    connect(messageBox, &QMessageBox::finished, this, [messageBox, yesButton, apply] {
+        if (messageBox->clickedButton() == yesButton) {
+            apply();
+        }
+    });
+    messageBox->open();
+#else
+    Q_UNUSED(folder)
+    Q_UNUSED(prefetch)
+#endif
+}
 
 void AccountSettings::showConnectionLabel(const QString &message, SyncResult::Status status, QStringList errors)
 {
