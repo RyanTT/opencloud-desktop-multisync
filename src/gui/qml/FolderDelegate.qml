@@ -240,24 +240,13 @@ Pane {
                                         elide: Text.ElideMiddle
                                         text: folderDelegate.itemText
                                     }
-                                    // thumbnail prefetching runs independently of the sync, so it gets its own, lighter row
-                                    RowLayout {
+                                    // thumbnail prefetching runs independently of the sync, while the sync runs it is a single line of text
+                                    Label {
                                         Layout.fillWidth: true
+                                        elide: Text.ElideRight
                                         visible: folderDelegate.folder.thumbnailProgressVisible
-                                        opacity: 0.75
-
-                                        ProgressBar {
-                                            Layout.preferredWidth: parent.width / 3
-                                            value: folderDelegate.folder.thumbnailProgress
-                                            // paused states come without a bar
-                                            visible: folderDelegate.folder.thumbnailProgress >= 0
-                                        }
-                                        Label {
-                                            Layout.fillWidth: true
-                                            elide: Text.ElideRight
-                                            text: folderDelegate.folder.thumbnailStatus
-                                            Accessible.name: text
-                                        }
+                                        text: folderDelegate.folder.thumbnailStatus
+                                        Accessible.name: text
                                     }
                                 }
                             }
@@ -267,26 +256,20 @@ Pane {
                                 ColumnLayout {
                                     Layout.fillWidth: true
 
-                                    // thumbnail prefetching runs independently of the sync, so it gets its own, lighter row
-                                    RowLayout {
+                                    // without a sync, thumbnail prefetching looks like the sync progress and takes the place of the quota
+                                    ProgressBar {
                                         Layout.fillWidth: true
-                                        visible: folderDelegate.folder.thumbnailProgressVisible
-                                        opacity: 0.75
-
-                                        ProgressBar {
-                                            Layout.preferredWidth: parent.width / 3
-                                            value: folderDelegate.folder.thumbnailProgress
-                                            // paused states come without a bar
-                                            visible: folderDelegate.folder.thumbnailProgress >= 0
-                                        }
-                                        Label {
-                                            Layout.fillWidth: true
-                                            elide: Text.ElideRight
-                                            text: folderDelegate.folder.thumbnailStatus
-                                            Accessible.name: text
-                                        }
+                                        value: folderDelegate.folder.thumbnailProgress
+                                        // paused states come without a bar
+                                        visible: folderDelegate.folder.thumbnailProgressVisible && folderDelegate.folder.thumbnailProgress >= 0
                                     }
-                                    // thumbnail progress takes the place of the quota while it runs
+                                    Label {
+                                        Layout.fillWidth: true
+                                        elide: Text.ElideRight
+                                        visible: folderDelegate.folder.thumbnailProgressVisible
+                                        text: folderDelegate.folder.thumbnailStatus
+                                        Accessible.name: text
+                                    }
                                     Label {
                                         Accessible.ignored: true
                                         Layout.fillWidth: true
